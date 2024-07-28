@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         KiosqueRH - Mise en page collaborateurs
 // @namespace    http://tampermonkey.net/
-// @version      2.4
+// @version      2.45
 // @description  Reorder <tr> elements in the ProdTable within the 'colonne' div based on a predefined list of priorities
 // @author       Pierre GARDIE CGF
 // @match        https://hr-services.fr.adp.com/*
