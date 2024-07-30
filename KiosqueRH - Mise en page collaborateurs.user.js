@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         KiosqueRH - Mise en page collaborateurs
 // @namespace    http://tampermonkey.net/
-// @version      2.45
+// @version      2.5
 // @description  Reorder <tr> elements in the ProdTable within the 'colonne' div based on a predefined list of priorities
 // @author       Pierre GARDIE CGF
 // @match        https://hr-services.fr.adp.com/*
@@ -15,7 +15,7 @@
     console.log("test");
     // Liste des priorités
     const priorities = [
-        ["DIR RESTAU", "GERANT(E)", "CHEF GERAN", "RESP PT VE", "MAITRE D'H"],
+        ["DIR RESTAU", "GERANT(E)", "CHEF GERAN", "RESP PT VE", "MAITRE D'H", "ADJ RESP R"],
         ["CHEF DE CU", "SECOND CUI", "CUISINIER", "CHEF DE PA", "COMMIS CUI", "CHEF EXECU"],
         ["CHEF PATIS", "PATISSIER("],
         ["EMPL POLY", "EMP REST C", "EMPL RESTA", "EMPL DE RE","EMP QUALIF", "CAISSIER (", "EMP TECH R", "RESP PREPA"],
