@@ -12,7 +12,6 @@
 
 (function() {
     'use strict';
-    console.log("test");
     // Liste des priorités
     const priorities = [
         ["DIR RESTAU", "GERANT(E)", "CHEF GERAN", "RESP PT VE", "MAITRE D'H", "ADJ RESP R"],
