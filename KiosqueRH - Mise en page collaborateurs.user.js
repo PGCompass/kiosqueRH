@@ -208,4 +208,27 @@
         insertRowsIntoTable(sortedRows2, secondTable);
     }
 
+    // Fonction pour masquer le dernier <td> de chaque <tr> dans un élément conteneur donné
+    function hideLastTdInRows(container) {
+        // Sélectionner tous les <tr> dans le conteneur
+        const rows = container.querySelectorAll('tr');
+
+        // Parcourir chaque <tr>
+        rows.forEach(row => {
+            // Sélectionner le dernier <td> dans le <tr>
+            const lastTd = row.querySelector('td:last-child');
+
+            // Si un dernier <td> est trouvé, masquer ce <td>
+            if (lastTd) {
+                lastTd.style.display = 'none';
+            }
+        });
+    }
+
+    const secondDiv = document.getElementById('ligne');
+    const colonneDiv = document.getElementById('colonne');
+    const lastDiv = colonneDiv.nextElementSibling;
+    hideLastTdInRows(secondDiv);
+    hideLastTdInRows(lastDiv);
+
 })();
