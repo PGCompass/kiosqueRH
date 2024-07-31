@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         KiosqueRH - Mise en page collaborateurs
 // @namespace    http://tampermonkey.net/
-// @version      2.5
+// @version      2.6
 // @description  Reorder <tr> elements in the ProdTable within the 'colonne' div based on a predefined list of priorities
 // @author       Pierre GARDIE CGF
 // @match        https://hr-services.fr.adp.com/*
@@ -12,6 +12,7 @@
 
 (function() {
     'use strict';
+
     // Liste des priorités
     const priorities = [
         ["DIR RESTAU", "GERANT(E)", "CHEF GERAN", "RESP PT VE", "MAITRE D'H", "ADJ RESP R"],
@@ -22,62 +23,95 @@
         ["TEST", "TEST2"]
     ];
 
-    // Fonction pour obtenir les lignes <tr> de premier niveau à partir du div avec l'id 'colonne'
-    function getTopLevelRows() {
-        const colonneDiv = document.getElementById('colonne');
-        if (!colonneDiv) return [];
+    // Fonction pour obtenir les lignes <tr> de premier niveau à partir d'un div avec un ID donné
+    function getRowsFromContainer(containerId, sliceFrom = 0) {
+        const container = document.getElementById(containerId);
+        if (!container) return [];
 
-        const table = colonneDiv.querySelector('table.ProdTable');
+        const table = container.querySelector('table.ProdTable');
         if (!table) return [];
 
-        // Sélectionner uniquement les <tr> de premier niveau
-        return Array.from(table.querySelectorAll(':scope > tbody > tr, :scope > tr')).slice(15);
+        return Array.from(table.querySelectorAll(':scope > tbody > tr, :scope > tr')).slice(sliceFrom);
     }
 
-    function sortSecondDiv() {
+    // Fonction pour obtenir les lignes <tr> du deuxième div adjacent au div 'colonne'
+    function getSecondDivRows(sliceFrom = 0) {
         const colonneDiv = document.getElementById('colonne');
         if (!colonneDiv) return [];
 
-        const lastDiv = colonneDiv.nextElementSibling;
-        if (!lastDiv) return [];
+        const nextDiv = colonneDiv.nextElementSibling;
+        if (!nextDiv) return [];
 
-        return Array.from(lastDiv.getElementsByTagName('tr')).slice(14);
+        return Array.from(nextDiv.getElementsByTagName('tr')).slice(sliceFrom);
+    }
+
+    // Tableau global pour stocker les données accumulées des heures
+    const hoursTable = [];
+
+    // Fonction pour ajouter les heures et afficher le tableau mis à jour
+    function addHours(qualificationId, htmlContent) {
+        // Vérifier que htmlContent est un élément DOM
+        if (!(htmlContent instanceof HTMLElement)) {
+            console.error('htmlContent doit être un élément DOM');
+            return;
+        }
+
+        // Trouver tous les éléments td
+        const allDays = htmlContent.querySelectorAll('td');
+        const days = Array.from(allDays).slice(1, -1); // Exclure le premier et le dernier élément td
+
+        days.forEach((day, index) => {
+            const hours = parseFloat(day.textContent.trim().replace(',', '.'));
+            if (isNaN(hours)) {
+                console.warn(`Heures invalides pour l'élément à l'index ${index}: "${day.textContent}"`);
+                return;
+            }
+
+            if (!hoursTable[qualificationId]) hoursTable[qualificationId] = {};
+            if (!hoursTable[qualificationId][index]) hoursTable[qualificationId][index] = 0;
+            if (hours > 0) hoursTable[qualificationId][index] += 1;
+        });
+
+        console.log(hoursTable); // Afficher le tableau mis à jour dans la console
+    }
+
+    // Fonction pour créer une ligne vide
+    function createEmptyRow() {
+        const emptyRow = document.createElement('tr');
+        emptyRow.style.height = '12px';
+        emptyRow.style.border = '1px solid transparent';
+        return emptyRow;
     }
 
     // Fonction pour classer les lignes <tr> selon la liste des priorités
-    function sortRows(rows, rows2) {
-        let sortedRows = [];
-        let otherRows = [];
-        let sortedRows2 = [];
-        let otherRows2 = [];
+    function sortAndGroupRows(rows, rows2) {
+        const sortedRows = Array(priorities.length).fill().map(() => []);
+        const otherRows = [];
+        const sortedRows2 = Array(priorities.length).fill().map(() => []);
+        const otherRows2 = [];
 
         rows.forEach((row, i) => {
             const roleElement = row.querySelector('.PRODFonc');
-            if (roleElement) {
-                const role = roleElement.innerText.trim();
-                let isSorted = false;
-                priorities.forEach((group, index) => {
-                    if (group.includes(role)) {
-                        if (!sortedRows[index]) sortedRows[index] = [];
-                        if (!sortedRows2[index]) sortedRows2[index] = [];
-                        sortedRows[index].push(row);
-                        sortedRows2[index].push(rows2[i]);
-                        isSorted = true;
-                    }
-                });
-                if (!isSorted) {
-                    otherRows.push(row);
-                    otherRows2.push(rows2[i]);
+            const role = roleElement ? roleElement.innerText.trim() : null;
+
+            let isSorted = false;
+            priorities.forEach((group, index) => {
+                if (group.includes(role)) {
+                    sortedRows[index].push(row);
+                    sortedRows2[index].push(rows2[i]);
+                    if ([1, 3, 4].includes(index)) addHours(index, rows2[i]);
+                    isSorted = true;
                 }
-            } else {
+            });
+
+            if (!isSorted) {
                 otherRows.push(row);
                 otherRows2.push(rows2[i]);
             }
         });
 
-        // Créer des lignes vides avec une hauteur spécifique pour les rendre visibles
-        const flatSortedRows = sortedRows.flatMap(groupRows => groupRows ? [...groupRows, createEmptyRow()] : []);
-        const flatSortedRows2 = sortedRows2.flatMap(groupRows2 => groupRows2 ? [...groupRows2, createEmptyRow()] : []);
+        const flatSortedRows = sortedRows.flatMap(groupRows => groupRows.length ? [...groupRows, createEmptyRow()] : []);
+        const flatSortedRows2 = sortedRows2.flatMap(groupRows2 => groupRows2.length ? [...groupRows2, createEmptyRow()] : []);
 
         return {
             sortedRows: flatSortedRows.concat(otherRows),
@@ -85,34 +119,24 @@
         };
     }
 
-    // Fonction pour créer une ligne vide
-    function createEmptyRow() {
-        const emptyRow = document.createElement('tr');
-        emptyRow.style.height = '12px'; // Ajuster la hauteur si nécessaire
-        emptyRow.style.border = '1px solid transparent'; // Style pour voir la ligne vide
-        return emptyRow;
-    }
-
-    // Fonction pour réinsérer les lignes classées
-    function insertSortedRows(sortedRows, container) {
-        if (!container) return;
-
-        sortedRows.forEach(row => container.appendChild(row));
+    // Fonction pour réinsérer les lignes classées dans un tableau
+    function insertRowsIntoTable(rows, table) {
+        if (!table) return;
+        rows.forEach(row => table.appendChild(row));
     }
 
     // Exécution du script
-    const colonneRows = getTopLevelRows();
-    const colonneRows2 = sortSecondDiv();
+    const colonneRows = getRowsFromContainer('colonne', 15);
+    const colonneRows2 = getSecondDivRows(14);
 
     if (colonneRows.length > 0 && colonneRows2.length > 0) {
-        const { sortedRows, sortedRows2 } = sortRows(colonneRows, colonneRows2);
+        const { sortedRows, sortedRows2 } = sortAndGroupRows(colonneRows, colonneRows2);
 
-        // Sélectionner les tables de destination
-        const table = document.querySelector('div#colonne table.ProdTable tbody') || document.querySelector('div#colonne table.ProdTable');
-        const lastDivTable = document.querySelector('div#colonne').nextElementSibling.querySelector('table');
+        const mainTableBody = document.querySelector('div#colonne table.ProdTable tbody') || document.querySelector('div#colonne table.ProdTable');
+        const secondTable = document.querySelector('div#colonne').nextElementSibling.querySelector('table');
 
-        // Réinsérer les lignes triées dans les tables appropriées
-        insertSortedRows(sortedRows, table);
-        insertSortedRows(sortedRows2, lastDivTable);
+        insertRowsIntoTable(sortedRows, mainTableBody);
+        insertRowsIntoTable(sortedRows2, secondTable);
     }
+
 })();
