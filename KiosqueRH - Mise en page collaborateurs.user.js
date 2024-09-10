@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         KiosqueRH - Mise en page collaborateurs
 // @namespace    http://tampermonkey.net/
-// @version      2.6
+// @version      3.0
 // @description  Reorder <tr> elements in the ProdTable within the 'colonne' div based on a predefined list of priorities
 // @author       Pierre GARDIE CGF
 // @match        https://hr-services.fr.adp.com/*
@@ -18,8 +18,8 @@
         ["DIR RESTAU", "GERANT(E)", "CHEF GERAN", "RESP PT VE", "MAITRE D'H", "ADJ RESP R"],
         ["CHEF DE CU", "SECOND CUI", "CUISINIER", "CHEF DE PA", "COMMIS CUI", "CHEF EXECU"],
         ["CHEF PATIS", "PATISSIER("],
-        ["EMPL POLY", "EMP REST C", "EMPL RESTA", "EMPL DE RE","EMP QUALIF", "CAISSIER (", "EMP TECH R", "RESP PREPA"],
-        ["PLONGEUR(E", "MAGASINIER", "PLONGEUR B"],
+        ["EMPL POLY", "EMP REST C", "EMPL RESTA", "EMPL DE RE","EMP QUALIF", "CAISSIER (", "EMP TECH R", "RESP PREPA","CHEF DE GR"],
+        ["PLONGEUR(E", "MAGASINIER", "PLONGEUR B", "AGENT ENTR"],
         ["TEST", "TEST2"]
     ];
 
@@ -48,13 +48,21 @@
     // Fonction pour écrire les données dans les trois dernières lignes du tableau
     function writeDataToRows(data) {
         const colonneDiv = document.getElementById('colonne');
-        const rows = Array.from(colonneDiv.querySelectorAll('tr'));
+        const rows = Array.from(colonneDiv.querySelectorAll('td.ProdTitreLigne'));
+
+        // Trouver la ligne qui contient un <td> avec le texte "Total Salariés"
+        let targetRowIndex = -1;
+        rows.forEach((row, index) => {
+            if (row && row.textContent.trim() === "Total Salariés") {
+                targetRowIndex = index;
+                console.log(targetRowIndex);
+            }
+        });
 
         // Vérifie qu'il y a au moins trois lignes dans le tableau
         if (rows.length >= 3) {
             // Avant-avant-dernier <tr>
-            const penultimate2Row = rows[rows.length - 3];
-            const firstTdPenultimate2 = penultimate2Row.querySelector('td');
+            const firstTdPenultimate2 = rows[targetRowIndex];
             if (firstTdPenultimate2) {
                 firstTdPenultimate2.textContent = "Nombre de cuisinier";
                 firstTdPenultimate2.style.textAlign = 'right';
@@ -62,8 +70,7 @@
             }
 
             // Avant-dernier <tr>
-            const penultimate1Row = rows[rows.length - 2];
-            const firstTdPenultimate1 = penultimate1Row.querySelector('td');
+            const firstTdPenultimate1 = rows[rows.length - 2];
             if (firstTdPenultimate1) {
                 firstTdPenultimate1.textContent = "Nombre d'EDR";
                 firstTdPenultimate1.style.textAlign = 'right';
@@ -71,8 +78,7 @@
             }
 
             // Dernier <tr>
-            const lastRow = rows[rows.length - 1];
-            const firstTdLast = lastRow.querySelector('td');
+            const firstTdLast = rows[rows.length - 1];
             if (firstTdLast) {
                 firstTdLast.textContent = "Nombre de plongeur";
                 firstTdLast.style.textAlign = 'right';
@@ -84,11 +90,12 @@
 
         const lastDiv = colonneDiv.nextElementSibling;
         // Récupérer les <tr> spécifiés dans le deuxième div adjacent
-        const penultimate2Row = lastDiv.querySelector('tr:nth-last-of-type(3)');
+        const rowsLastDiv = Array.from(lastDiv.querySelectorAll('tr'));
+        const penultimate2Row = rowsLastDiv[targetRowIndex + 1];
         const penultimate1Row = lastDiv.querySelector('tr:nth-last-of-type(2)');
         const lastRow = lastDiv.querySelector('tr:last-of-type');
 
-        if (!penultimate2Row || !penultimate1Row || !lastRow) {
+        if (!penultimate1Row || !lastRow) {
             console.error('Les lignes spécifiées ne sont pas trouvées dans les divs');
             return;
         }
