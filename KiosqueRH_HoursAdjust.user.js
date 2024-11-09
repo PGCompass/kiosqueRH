@@ -1,6 +1,5 @@
 // ==UserScript==
 // @name         KiosqueRH - Ajustement des heures +/-
-// @namespace    https://github.com/PGCompass/kiosqueRH/issues
 // @version      1.4
 // @description  Ajoute des boutons + et - pour modifier le montant d'une cellule
 // @author       Pierre GARDIE - Compass Group France
