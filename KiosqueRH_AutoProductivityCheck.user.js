@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name         KiosqueRH - Vérification productivité auto V2
-// @version      1.1
+// @name         KiosqueRH - Vérification productivité auto
+// @version      2.0
 // @description  Calcul automatique des productivités
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -9,6 +9,8 @@
 // @downloadURL  https://github.com/PGCompass/kiosqueRH/raw/refs/heads/main/KiosqueRH_AutoProductivityCheck.user.js
 // @grant        none
 // ==/UserScript==
+
+/* global $ */
 
 (function() {
     'use strict';
@@ -28,6 +30,11 @@
     const bandeauEnteteProd = document.querySelector('.BandeauEntete');
 
     if (bandeauEnteteProd && bandeauEnteteProd.textContent.trim() === "Saisie productivité prévisionnelle") {
+        attachButtonEvents();
+        customizeButtons();
+    }
+
+    function attachButtonEvents() {
         const targetElementProd = document.querySelector('[name="BT_exporter"]');
         if (targetElementProd) {
             targetElementProd.onclick = function() {
@@ -37,11 +44,6 @@
                     return false;
                 }
             };
-        }
-
-        const targetElementspanProd = document.querySelector('.cougar-btn-export');
-        if (targetElementspanProd) {
-            targetElementspanProd.innerText = '\u00A0\u00A0\u00A0Prod Auto';
         }
 
         const targetElementbisProd = document.querySelector('[name="BT_exporterTotal"]');
@@ -54,6 +56,13 @@
                 }
             };
         }
+    }
+
+    function customizeButtons() {
+        const targetElementspanProd = document.querySelector('.cougar-btn-export');
+        if (targetElementspanProd) {
+            targetElementspanProd.innerText = '\u00A0\u00A0\u00A0Prod Auto';
+        }
 
         const targetElementspanbisProd = document.querySelectorAll('.cougar-btn-export')[1];
         if (targetElementspanbisProd) {
@@ -65,11 +74,7 @@
         const indiceUR = prodCodeUR.findIndex(item => item[0] === UR);
         if (indiceUR !== -1) {
             const urData = prodCodeUR[indiceUR];
-            if (colonne >= 0 && colonne < urData.length) {
-                return urData[colonne];
-            } else {
-                return urData[urData.length - 1];
-            }
+            return (colonne >= 0 && colonne < urData.length) ? urData[colonne] : urData[urData.length - 1];
         } else {
             return null;
         }
@@ -80,11 +85,16 @@
         if (tablesProd.length > 0) {
             const lastTableProd = tablesProd[tablesProd.length - 1];
 
-            const couverts = parseFloat(lastTableProd.querySelectorAll('tr')[0].querySelectorAll('td')[index].querySelector('input').value.trim() !== '' ? lastTableProd.querySelectorAll('tr')[0].querySelectorAll('td')[index].querySelector('input').value.replace(',', '.') : 0);
-            const total_salaries = parseFloat(lastTableProd.querySelectorAll('tr')[1].querySelectorAll('td')[index].textContent.trim() !== '' ? lastTableProd.querySelectorAll('tr')[1].querySelectorAll('td')[index].textContent.trim().replace(',', '.') : 0);
-            const heure_plus = parseFloat(lastTableProd.querySelectorAll('tr')[2].querySelectorAll('td')[index].querySelector('input').value.trim() !== '' ? lastTableProd.querySelectorAll('tr')[2].querySelectorAll('td')[index].querySelector('input').value.replace(',', '.') : 0);
-            const interim = parseFloat(lastTableProd.querySelectorAll('tr')[3].querySelectorAll('td')[index].textContent.trim() !== '' ? lastTableProd.querySelectorAll('tr')[3].querySelectorAll('td')[index].textContent.trim().replace(',', '.') : 0);
-            const int_heure_plus = parseFloat(lastTableProd.querySelectorAll('tr')[4].querySelectorAll('td')[index].querySelector('input').value.trim() !== '' ? lastTableProd.querySelectorAll('tr')[4].querySelectorAll('td')[index].querySelector('input').value.replace(',', '.') : 0);
+            const getNumericInputValue = (row, column) => parseFloat(
+                lastTableProd.querySelectorAll('tr')[row].querySelectorAll('td')[column].querySelector('input')?.value.trim().replace(',', '.') || 0
+            );
+
+            const couverts = getNumericInputValue(0, index);
+            const total_salaries = parseFloat(lastTableProd.querySelectorAll('tr')[1].querySelectorAll('td')[index].textContent.trim().replace(',', '.') || 0);
+            const heure_plus = getNumericInputValue(2, index);
+            const interim = parseFloat(lastTableProd.querySelectorAll('tr')[3].querySelectorAll('td')[index].textContent.trim().replace(',', '.') || 0);
+            const int_heure_plus = getNumericInputValue(4, index);
+
             const total_heure = lastTableProd.querySelectorAll('tr')[5].querySelectorAll('td')[index];
             const ETP = lastTableProd.querySelectorAll('tr')[6].querySelectorAll('td')[index];
             const prod_heure = lastTableProd.querySelectorAll('tr')[7].querySelectorAll('td')[index];
@@ -99,19 +109,14 @@
             ETP.textContent = calc_ETP.toFixed(2).replace('.', ',');
             prod_heure.textContent = !isNaN(calc_prod_heure) ? calc_prod_heure.toFixed(2).replace('.', ',') : '0,00';
             productivite.textContent = !isNaN(calc_productivite) ? calc_productivite.toFixed(2).replace('.', ',') : '0,00';
-
-            if (calc_productivite < (prod * 0.95)) {
-                productivite.style.backgroundColor = "red";
-            } else {
-                productivite.style.backgroundColor = "green";
-            }
+            productivite.style.backgroundColor = calc_productivite < (prod * 0.95) ? "red" : "green";
         }
     }
 
     function recupererContenuPremiereLigneProd() {
         const codeUR = $('#UR').val();
         const td = $('.ProdDonneesCal');
-        const nombreDeTD = $('tr:last .ProdNBH').length;
+        const nombreDeTD = $('.ProdDonneesCal').length;
         let id = 0;
 
         if (td.length > 0) {
@@ -121,11 +126,11 @@
                 const NBCOUV = $('#NBCOUV_' + id).val();
                 const ajustheure = document.getElementById('AJUSTDIV_' + id);
                 const ajustheureint = document.getElementById('AJUSTINT_' + id);
-                const totalheure = parseFloat($('tr:last .ProdNBH').eq(id).text().trim().replace(',', '.'));
+                const valeurTotpla = document.getElementById('TOTPLA_' + id).textContent.trim();
+                const totalheure = parseFloat(valeurTotpla.replace(',', '.'));
+                console.log(totalheure);
 
                 if (jour === "SA" || jour === "DI") {
-                    const ajustcouv = document.getElementById('NBCOUV_' + id);
-                    ajustcouv.value = 0;
                     ajustheure.value = -totalheure;
                     ajustheureint.value = "0";
                 } else if (NBCOUV == 0) {
@@ -137,61 +142,20 @@
                 } else {
                     const tranche = (NBCOUV - (NBCOUV % (100/3))) / (100/3) + 4;
                     prod = geturdataProd(codeUR, tranche);
-                    console.log(NBCOUV);
                     const heureprev = (NBCOUV / prod) * 7.38;
-                    if (heureprev <= totalheure) {
-                        const reste = (totalheure - heureprev) % 7.38;
-                        const heuretp = (totalheure - heureprev - reste);
-                        let nbdemi = 0;
+                    const reste = (totalheure - heureprev) % 7.38;
+                    const heuretp = totalheure - heureprev - reste;
+                    let nbdemi = 0;
 
-                        if (reste / 3.7 > 1 && geturdataProd(codeUR, 3) > 0) {
-                            nbdemi = 5;
-                        }
-
-                        let heurearetirer = -heuretp - nbdemi;
-
-                        if (nbdemi > 0) {
-                            if (Math.abs((totalheure - heureprev) + heurearetirer) > Math.abs((totalheure - heureprev) + heurearetirer - 5)) {
-                                heurearetirer -= 5;
-                            }
-                        } else {
-                            if (Math.abs((totalheure - heureprev) + heurearetirer) > Math.abs((totalheure - heureprev) + heurearetirer - 7.38)) {
-                                heurearetirer -= 7.38;
-                            }
-                        }
-
-                        ajustheure.value = heurearetirer.toFixed(2);
-                        ajustheureint.value = 0;
-
-                    } else {
-                        const resteinterim = (heureprev - totalheure) % 7;
-                        const heureinttp = heureprev - totalheure - resteinterim;
-                        let demiint = 0;
-
-                        if (resteinterim / 3 > 1) {
-                            demiint = 4.5;
-                        }
-
-                        let intaajouter = heureinttp + demiint;
-
-                        if (demiint > 0) {
-                            if (Math.abs((heureprev - totalheure) - intaajouter) > Math.abs((heureprev - totalheure) - (intaajouter + 4.5))) {
-                                intaajouter += 4.5;
-                            }
-                        } else {
-                            if (Math.abs((heureprev - totalheure) - intaajouter) > Math.abs((heureprev - totalheure) - (intaajouter + 7))) {
-                                intaajouter += 7;
-                            }
-                        }
-
-                        ajustheure.value = 0;
-                        ajustheureint.value = intaajouter.toFixed(2);
+                    if (reste / 3.7 > 1 && geturdataProd(codeUR, 3) > 0) {
+                        nbdemi = 5;
                     }
+
+                    ajustheure.value = (-heuretp - nbdemi).toFixed(2);
+                    ajustheureint.value = 0;
                 }
                 let col_id = index + 1;
-                if (NBCOUV > 0) {
-                    recalculProd(col_id, prod);
-                }
+                if (NBCOUV > 0) recalculProd(col_id, prod);
                 id += 1;
             });
         }
@@ -200,22 +164,17 @@
     function verification_prod() {
         const codeUR = $('#UR').val();
         const td = $('.ProdDonneesCal');
-        const nombreDeTD = $('tr:last .ProdNBH').length;
+        const nombreDeTD = $('.ProdDonneesCal').length;
         let id = 0;
         let prod;
 
         if (td.length > 0) {
             td.slice(0, nombreDeTD).each(function(index, colonne) {
-                const jour = $(colonne).html().split('<br>')[0];
                 const NBCOUV = $('#NBCOUV_' + id).val();
                 const tranche = (NBCOUV - (NBCOUV % (100/3))) / (100/3) + 4;
-
                 prod = geturdataProd(codeUR, tranche);
-
                 let col_id = index + 1;
-                if (NBCOUV > 0) {
-                    recalculProd(col_id, prod);
-                }
+                if (NBCOUV > 0) recalculProd(col_id, prod);
                 id += 1;
             });
         }
