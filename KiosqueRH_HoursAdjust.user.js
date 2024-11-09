@@ -3,6 +3,7 @@
 // @namespace    VotreNamespace
 // @version      1.4
 // @description  Ajoute des boutons + et - pour modifier le montant d'une cellule
+// @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
 // @updateURL    https://github.com/PGCompass/kiosqueRH/raw/refs/heads/main/KiosqueRH_HoursAdjust.user.js
 // @downloadURL  https://github.com/PGCompass/kiosqueRH/raw/refs/heads/main/KiosqueRH_HoursAdjust.user.js
