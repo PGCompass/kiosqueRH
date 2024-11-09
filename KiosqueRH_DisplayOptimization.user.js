@@ -1,6 +1,5 @@
 // ==UserScript==
 // @name         KiosqueRH - Optimisation d'affichage
-// @namespace    https://github.com/PGCompass/kiosqueRH/issues
 // @version      0.1
 // @description  Optimisation de l'affichage
 // @author       Pierre GARDIE - Compass Group France
