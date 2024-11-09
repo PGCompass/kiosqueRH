@@ -3,7 +3,7 @@
 // @namespace    http://tampermonkey.net/
 // @version      3.0
 // @description  Reorder <tr> elements in the ProdTable within the 'colonne' div based on a predefined list of priorities
-// @author       Pierre GARDIE CGF
+// @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
 // @updateURL    https://github.com/PGCompass/kiosqueRH/raw/refs/heads/main/KiosqueRH_CollabLayout.user.js
 // @downloadURL  https://github.com/PGCompass/kiosqueRH/raw/refs/heads/main/KiosqueRH_CollabLayout.user.js
