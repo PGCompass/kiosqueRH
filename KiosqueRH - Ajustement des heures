@@ -4,6 +4,8 @@
 // @version      1.4
 // @description  Ajoute des boutons + et - pour modifier le montant d'une cellule
 // @match        https://hr-services.fr.adp.com/*
+// @updateURL    
+// @downloadURL  
 // @grant        none
 // ==/UserScript==
 
