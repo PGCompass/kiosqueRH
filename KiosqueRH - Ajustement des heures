@@ -4,8 +4,8 @@
 // @version      1.4
 // @description  Ajoute des boutons + et - pour modifier le montant d'une cellule
 // @match        https://hr-services.fr.adp.com/*
-// @updateURL    
-// @downloadURL  
+// @updateURL    https://github.com/PGCompass/kiosqueRH/raw/refs/heads/main/KiosqueRH%20-%20Ajustement%20des%20heures
+// @downloadURL  https://github.com/PGCompass/kiosqueRH/raw/refs/heads/main/KiosqueRH%20-%20Ajustement%20des%20heures
 // @grant        none
 // ==/UserScript==
 
