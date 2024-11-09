@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Vérification productivité auto V2
-// @namespace    http://tampermonkey.net/
+// @namespace    https://github.com/PGCompass/kiosqueRH/issues
 // @version      1.1
 // @description  Calcul automatique des productivités
 // @author       Pierre GARDIE - Compass Group France
