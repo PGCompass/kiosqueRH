@@ -2,7 +2,7 @@
 // @name         KiosqueRH - Optimisation d'affichage
 // @namespace    https://github.com/PGCompass/kiosqueRH/issues
 // @version      0.1
-// @description  try to take over the world!
+// @description  Optimisation de l'affichage
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
 // @require      http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
