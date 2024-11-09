@@ -5,6 +5,8 @@
 // @description  Supprime des options spécifiques d'une liste déroulante
 // @author       Votre Nom
 // @match        https://hr-services.fr.adp.com/*
+// @updateURL    
+// @downloadURL  
 // @grant        none
 // ==/UserScript==
 
