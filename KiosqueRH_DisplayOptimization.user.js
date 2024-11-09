@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Optimisation d'affichage
-// @namespace    http://tampermonkey.net/
+// @namespace    https://github.com/PGCompass/kiosqueRH/issues
 // @version      0.1
 // @description  try to take over the world!
 // @author       Pierre GARDIE - Compass Group France
