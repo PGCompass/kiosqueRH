@@ -1,8 +1,9 @@
 // ==UserScript==
 // @name         KiosqueRH - Mise en page collaborateurs
+// @namespace    http://tampermonkey.net/
 // @version      3.0
 // @description  Reorder <tr> elements in the ProdTable within the 'colonne' div based on a predefined list of priorities
-// @author       Pierre GARDIE - Compass Group France
+// @author       Pierre GARDIE CGF
 // @match        https://hr-services.fr.adp.com/*
 // @updateURL    https://github.com/PGCompass/kiosqueRH/raw/refs/heads/main/KiosqueRH_CollabLayout.user.js
 // @downloadURL  https://github.com/PGCompass/kiosqueRH/raw/refs/heads/main/KiosqueRH_CollabLayout.user.js
@@ -18,7 +19,8 @@
         ["CHEF DE CU", "SECOND CUI", "CUISINIER", "CHEF DE PA", "COMMIS CUI", "CHEF EXECU"],
         ["CHEF PATIS", "PATISSIER("],
         ["EMPL POLY", "EMP REST C", "EMPL RESTA", "EMPL DE RE","EMP QUALIF", "CAISSIER (", "EMP TECH R", "RESP PREPA","CHEF DE GR"],
-        ["PLONGEUR(E", "MAGASINIER", "PLONGEUR B", "AGENT ENTR"],
+        ["PLONGEUR(E", "MAGASINIER", "PLONGEUR B", "AGENT ENTR", "PLONG AIDE", "AIDE MAGAS", "CHEF PLONG"],
+        ["HOTE(SSE)"],
         ["TEST", "TEST2"]
     ];
 
@@ -90,7 +92,7 @@
         const lastDiv = colonneDiv.nextElementSibling;
         // Récupérer les <tr> spécifiés dans le deuxième div adjacent
         const rowsLastDiv = Array.from(lastDiv.querySelectorAll('tr'));
-        const penultimate2Row = rowsLastDiv[targetRowIndex + 1];
+        const penultimate2Row = rowsLastDiv[targetRowIndex + 5];// ==============> REGLAGE LIGNE CUISINIER
         const penultimate1Row = lastDiv.querySelector('tr:nth-last-of-type(2)');
         const lastRow = lastDiv.querySelector('tr:last-of-type');
 
@@ -202,7 +204,7 @@
 
     // Exécution du script : récupération des lignes de deux divs et tri/groupement
     const colonneRows = getRowsFromContainer('colonne', 15);
-    const colonneRows2 = getSecondDivRows(14);
+    const colonneRows2 = getSecondDivRows(13);
 
     if (colonneRows.length > 0 && colonneRows2.length > 0) {
         const { sortedRows, sortedRows2 } = sortAndGroupRows(colonneRows, colonneRows2);
