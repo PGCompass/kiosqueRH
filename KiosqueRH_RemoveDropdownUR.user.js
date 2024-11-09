@@ -1,6 +1,5 @@
 // ==UserScript==
 // @name         KiosqueRH - Supprimer UR Liste Déroulante
-// @namespace    https://github.com/PGCompass/kiosqueRH/issues
 // @version      1.1
 // @description  Supprime des options spécifiques d'une liste déroulante
 // @author       Pierre GARDIE - Compass Group France
