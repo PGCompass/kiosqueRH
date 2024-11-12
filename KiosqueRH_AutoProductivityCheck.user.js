@@ -7,7 +7,6 @@
 // @require      http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
 // @updateURL    https://github.com/PGCompass/kiosqueRH/raw/refs/heads/main/KiosqueRH_AutoProductivityCheck.user.js
 // @downloadURL  https://github.com/PGCompass/kiosqueRH/raw/refs/heads/main/KiosqueRH_AutoProductivityCheck.user.js
-// @grant        none
 // ==/UserScript==
 
 /* global $ */
@@ -19,12 +18,13 @@
         // UR    ,Plusieurs ETP ?, heures minimale, mitemps oui ou non, prod pas de 33 couverts [1 - 33; 34 - 66; 67 - 99; 100 - 133; ...]
         ["234001",0,7.55,0,33,66,99],
         ["304501",1,22.14,0,18,18.3,25,29.6,33.7,33.6,34.7,36.8,39.6,43.7,47.5,48.3,53.9],
-        ["960001",1,22.14,1,25,25,25,25,33.5,44.3,41.8,46.9,41.4,40.8,46.2,45.6,50.0,50.6,51.5,53.8,54.8,52.9,54.0,61.0],
-        ["C48001",1,22.14,1,12,12.2,18.6,25.0,28.1,30.7,32.5,36.3,37,39.6,41.1,44.8,49.3,54.8,62.2],
+        ["960001",1,22.14,1,25,25,25,25,33.5,44.3,41.8,46.9,41.4,40.8,46.2,45.6,48,48,48,48,48,48,48,48],
+        ["C48001",1,22.14,1,12,12.2,18.6,25.0,28.1,30.7,36,36.3,37,39.6,41.1,44.8,49.3,54.8,62.2],
         ["D05301",1,22.14,1,16.9,22.7,26.2,30.3,32.9,35.2,41.4,44.0,47.0,50.1,52.9],
         ["D37501",1,22.14,0,19,19.1,28.5,34.6,37.9,41.3,40.4,42.7,47.2],
         ["F17501",1,22.14,0,27,27.5,41.3,57.4,60.9,65.7,73.0,83.8,86.6],
-        ["F76701",1,22.14,0,25,25,25,25,25,26.6,31.6,40.0,47.5]
+        ["F76701",1,22.14,0,25,25,25,25,25,26.6,31.6,40.0,47.5],
+        ["D39901",1,22.14,1,25,25,25,25,33.5,44.3,41.8,46.9,41.4,40.8,46.2,45.6,48,48,48,48,48,48,48,48]
     ];
 
     const bandeauEnteteProd = document.querySelector('.BandeauEntete');
@@ -76,7 +76,7 @@
             const urData = prodCodeUR[indiceUR];
             return (colonne >= 0 && colonne < urData.length) ? urData[colonne] : urData[urData.length - 1];
         } else {
-            return null;
+            return 40;//productivité de base pour tous les sites non référencés.
         }
     }
 
@@ -128,7 +128,6 @@
                 const ajustheureint = document.getElementById('AJUSTINT_' + id);
                 const valeurTotpla = document.getElementById('TOTPLA_' + id).textContent.trim();
                 const totalheure = parseFloat(valeurTotpla.replace(',', '.'));
-                console.log(totalheure);
 
                 if (jour === "SA" || jour === "DI") {
                     ajustheure.value = -totalheure;
