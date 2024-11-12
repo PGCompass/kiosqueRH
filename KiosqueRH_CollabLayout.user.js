@@ -27,9 +27,14 @@
 
     // Liste de rôles spécifiques avec leur groupe d'attribution
     const Role_employees = {
-        "KANE YAYA": 4,
+        // CUISINIER
+        "SIBON FRANCK": 1,
+        "APPOLON BEATRIC": 1,
+        // EDR
         "DJAFFRI FARIDA": 3,
-        "SIBON FRANCK": 1
+        "HARDION AGNES O": 3,
+        // PLONGEUR
+        "KANE YAYA": 4
     };
 
     function getRowsFromContainer(containerId, sliceFrom = 0) {
