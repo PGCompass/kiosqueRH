@@ -66,7 +66,6 @@
         rows.forEach((row, index) => {
             if (row && row.textContent.trim() === "Total Salariés") {
                 targetRowIndex = index;
-                console.log(targetRowIndex);
             }
         });
 
@@ -101,6 +100,13 @@
         const penultimate1Row = lastDiv.querySelector('tr:nth-last-of-type(2)');
         const lastRow = lastDiv.querySelector('tr:last-of-type');
 
+        const tablesProd = document.querySelectorAll('.ProdTable');
+        const lastTableProd = tablesProd[tablesProd.length - 1];
+        const getNumericInputValue = (row, column) => parseFloat(
+            lastTableProd.querySelectorAll('tr')[row].querySelectorAll('td')[column].querySelector('input')?.value.trim().replace(',', '.') || 0
+        );
+
+
         if (!penultimate1Row || !lastRow) {
             console.error('Les lignes spécifiées ne sont pas trouvées dans les divs');
             return;
@@ -126,9 +132,11 @@
             // Si 'data' est valide, on écrit les valeurs dans les cellules
             for (const key in data) {
                 if (index < cells.length) {
+                    const couverts = getNumericInputValue(0, index + 1);
                     cells[index].textContent = data[key] === 0 ? "" : data[key];
                     cells[index].style.textAlign = "center";
                     cells[index].style.fontWeight = "bold";
+                    if (couverts == 0 && data[key] > 0) {cells[index].style.backgroundColor = '#FF0000'};
                     index++;
                 } else {
                     break;
@@ -198,7 +206,6 @@
 
             if (name && Role_employees.hasOwnProperty(name)) {
                 const specificGroupIndex = Role_employees[name];
-                console.log(Role_employees[name]);
                 sortedRows[specificGroupIndex].push(row);
                 sortedRows2[specificGroupIndex].push(rows2[i]);
                 if ([1, 3, 4].includes(specificGroupIndex)) addHours(specificGroupIndex, rows2[i]);
