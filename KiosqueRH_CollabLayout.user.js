@@ -17,15 +17,20 @@
         ["DIR RESTAU", "GERANT(E)", "CHEF GERAN", "RESP PT VE", "MAITRE D'H", "ADJ RESP R", "GERANT ADJ", "APP MAN RE", "RESP POINT", "ASS ADMINI"],
         ["CHEF DE CU", "SECOND CUI", "CUISINIER", "CHEF DE PA", "COMMIS CUI", "CHEF EXECU", "APP CUISI"],
         ["CHEF PATIS", "PATISSIER("],
-        ["EMPL POLY", "EMP REST C", "EMPL RESTA", "EMPL DE RE","EMP QUALIF", "CAISSIER (", "EMP TECH R", "RESP PREPA","CHEF DE GR"],
+        ["EMPL POLY", "EMP REST C", "EMPL RESTA", "EMPL DE RE","EMP QUALIF", "CAISSIER (", "EMP TECH R", "RESP PREPA","CHEF DE GR", "CAISSIER R"],
         ["PLONGEUR(E", "MAGASINIER", "PLONGEUR B", "AGENT ENTR", "PLONGEUR M", "PLONG AIDE", "AIDE MAGAS", "CHEF PLONG"],
         ["HOTE(SSE)"],
         ["TEST", "TEST2"]
     ];
 
-    const Inactive_employees = ["LU JUN", "CISSE AMINATA", "SOW SIMBALA", "BAH ALPHA A", "ID HAISSOU NOUZHA", "DEREVIANKI EMILIE", "MEGUERDITC JEAN MA", "IMAM FATIHA", "DREAN FLORENC", "COMMAILLE ELODIE"];
+    const Inactive_employees = ["LU JUN", "CISSE AMINATA", "SOW SIMBALA", "BAH ALPHA A", "ID HAISSOU NOUZHA", "DEREVIANKI EMILIE", "MEGUERDITC JEAN MA", "IMAM FATIHA", "DREAN FLORENC", "COMMAILLE ELODIE", "BEN HAMMOU RIDHA", "AMGHAR SABIHA"];
 
-    // Fonction pour obtenir les lignes <tr> de premier niveau à partir d'un div avec un ID donné
+    // Liste de rôles spécifiques avec leur groupe d'attribution
+    const Role_employees = {
+        "KANE YAYA": 4,
+        "DJAFFRI FARIDA": 3
+    };
+
     function getRowsFromContainer(containerId, sliceFrom = 0) {
         const container = document.getElementById(containerId);
         if (!container) return [];
@@ -36,7 +41,6 @@
         return Array.from(table.querySelectorAll(':scope > tbody > tr, :scope > tr')).slice(sliceFrom);
     }
 
-    // Fonction pour obtenir les lignes <tr> du deuxième div adjacent au div 'colonne'
     function getSecondDivRows(sliceFrom = 0) {
         const colonneDiv = document.getElementById('colonne');
         if (!colonneDiv) return [];
@@ -47,12 +51,11 @@
         return Array.from(nextDiv.getElementsByTagName('tr')).slice(sliceFrom);
     }
 
-    // Fonction pour écrire les données dans les trois dernières lignes du tableau
+
     function writeDataToRows(data) {
         const colonneDiv = document.getElementById('colonne');
         const rows = Array.from(colonneDiv.querySelectorAll('td.ProdTitreLigne'));
 
-        // Trouver la ligne qui contient un <td> avec le texte "Total Salariés"
         let targetRowIndex = -1;
         rows.forEach((row, index) => {
             if (row && row.textContent.trim() === "Total Salariés") {
@@ -61,9 +64,7 @@
             }
         });
 
-        // Vérifie qu'il y a au moins trois lignes dans le tableau
         if (rows.length >= 3) {
-            // Avant-avant-dernier <tr>
             const firstTdPenultimate2 = rows[targetRowIndex];
             if (firstTdPenultimate2) {
                 firstTdPenultimate2.textContent = "Nombre de cuisinier";
@@ -71,7 +72,6 @@
                 firstTdPenultimate2.style.fontWeight = 'bold';
             }
 
-            // Avant-dernier <tr>
             const firstTdPenultimate1 = rows[rows.length - 2];
             if (firstTdPenultimate1) {
                 firstTdPenultimate1.textContent = "Nombre d'EDR";
@@ -79,7 +79,6 @@
                 firstTdPenultimate1.style.fontWeight = 'bold';
             }
 
-            // Dernier <tr>
             const firstTdLast = rows[rows.length - 1];
             if (firstTdLast) {
                 firstTdLast.textContent = "Nombre de plongeur";
@@ -91,9 +90,8 @@
         }
 
         const lastDiv = colonneDiv.nextElementSibling;
-        // Récupérer les <tr> spécifiés dans le deuxième div adjacent
         const rowsLastDiv = Array.from(lastDiv.querySelectorAll('tr'));
-        const penultimate2Row = rowsLastDiv[targetRowIndex + 5];//////// ICI A METTRE +1 OU +°+++
+        const penultimate2Row = rowsLastDiv[targetRowIndex + 5];
         const penultimate1Row = lastDiv.querySelector('tr:nth-last-of-type(2)');
         const lastRow = lastDiv.querySelector('tr:last-of-type');
 
@@ -102,13 +100,24 @@
             return;
         }
 
-        // Fonction pour écrire les données dans une ligne donnée
         const writeDataInRow = (row, data) => {
             const cells = row.querySelectorAll('td.ProdNBH');
             const cells_tot = row.querySelectorAll('td.ProdNBHTot');
             cells_tot[0].textContent = "";
 
             let index = 0;
+            // Si 'data' est vide ou mal défini, on met "" dans toutes les cellules
+            if (!data || Object.keys(data).length === 0) {
+                // Si 'data' est vide, mettre "" dans toutes les cellules
+                cells.forEach(cell => {
+                    cell.textContent = "";
+                    cell.style.textAlign = "center";
+                    cell.style.fontWeight = "bold";
+                });
+                return;
+            }
+
+            // Si 'data' est valide, on écrit les valeurs dans les cellules
             for (const key in data) {
                 if (index < cells.length) {
                     cells[index].textContent = data[key] === 0 ? "" : data[key];
@@ -121,14 +130,14 @@
             }
         };
 
-        writeDataInRow(penultimate2Row, data[1]);
-        writeDataInRow(penultimate1Row, data[3]);
-        writeDataInRow(lastRow, data[4]);
+        // Si 'data' est vide ou mal défini, on applique "" dans les lignes correspondantes
+        writeDataInRow(penultimate2Row, data[1] || {});
+        writeDataInRow(penultimate1Row, data[3] || {});
+        writeDataInRow(lastRow, data[4] || {});
     }
 
     const hoursTable = [];
 
-    // Fonction pour ajouter les heures et afficher le tableau mis à jour
     function addHours(qualificationId, htmlContent) {
         if (!(htmlContent instanceof HTMLElement)) {
             console.error('htmlContent doit être un élément DOM');
@@ -151,7 +160,6 @@
         });
     }
 
-    // Fonction pour créer une ligne vide pour espacer les groupes
     function createEmptyRow() {
         const emptyRow = document.createElement('tr');
         emptyRow.style.height = '12px';
@@ -159,7 +167,6 @@
         return emptyRow;
     }
 
-    // Fonction pour classer et grouper les lignes <tr> selon la liste des priorités
     function sortAndGroupRows(rows, rows2) {
         const sortedRows = Array(priorities.length).fill().map(() => []);
         const otherRows = [];
@@ -175,23 +182,31 @@
             const nameElement = row.querySelector('.PRODNomPre');
             const name = nameElement ? nameElement.innerText.trim() : null;
 
-            // Vérification si le nom est dans la liste des collaborateurs inactifs
             if (name && Inactive_employees.includes(name)) {
-                // Ajouter la ligne dans le groupe des inactifs
                 inactiveRows.push(row);
                 inactiveRows2.push(rows2[i]);
                 return;
             }
 
             let isSorted = false;
-            priorities.forEach((group, index) => {
-                if (group.includes(role)) {
-                    sortedRows[index].push(row);
-                    sortedRows2[index].push(rows2[i]);
-                    if ([1, 3, 4].includes(index)) addHours(index, rows2[i]);
-                    isSorted = true;
-                }
-            });
+
+            if (name && Role_employees.hasOwnProperty(name)) {
+                const specificGroupIndex = Role_employees[name];
+                console.log(Role_employees[name]);
+                sortedRows[specificGroupIndex].push(row);
+                sortedRows2[specificGroupIndex].push(rows2[i]);
+                if ([1, 3, 4].includes(specificGroupIndex)) addHours(specificGroupIndex, rows2[i]);
+                isSorted = true;
+            } else {
+                priorities.forEach((group, index) => {
+                    if (group.includes(role)) {
+                        sortedRows[index].push(row);
+                        sortedRows2[index].push(rows2[i]);
+                        if ([1, 3, 4].includes(index)) addHours(index, rows2[i]);
+                        isSorted = true;
+                    }
+                });
+            }
 
             if (!isSorted) {
                 otherRows.push(row);
@@ -199,28 +214,25 @@
             }
         });
 
-        writeDataToRows(hoursTable); // Écrire les données dans les 3 derniers TR
+        writeDataToRows(hoursTable);
 
         const flatSortedRows = sortedRows.flatMap(groupRows => groupRows.length ? [...groupRows, createEmptyRow()] : []);
         const flatSortedRows2 = sortedRows2.flatMap(groupRows2 => groupRows2.length ? [...groupRows2, createEmptyRow()] : []);
 
-        // Créer une ligne vide avec un espace de 30px
         const spacerRow = document.createElement('tr');
         spacerRow.style.height = '30px';
 
-        // Retourner les lignes triées, en ajoutant les lignes inactives à la fin après une ligne vide
         return {
             sortedRows: flatSortedRows.concat(otherRows).concat([spacerRow]).concat(inactiveRows),
             sortedRows2: flatSortedRows2.concat(otherRows2).concat([spacerRow.cloneNode()]).concat(inactiveRows2)
         };
     }
-    // Fonction pour réinsérer les lignes classées dans un tableau
+
     function insertRowsIntoTable(rows, table) {
         if (!table) return;
         rows.forEach(row => table.appendChild(row));
     }
 
-    // Exécution du script : récupération des lignes de deux divs et tri/groupement
     const colonneRows = getRowsFromContainer('colonne', 26);
     const colonneRows2 = getSecondDivRows(24);
 
@@ -234,17 +246,10 @@
         insertRowsIntoTable(sortedRows2, secondTable);
     }
 
-    // Fonction pour masquer le dernier <td> de chaque <tr> dans un élément conteneur donné
     function hideLastTdInRows(container) {
-        // Sélectionner tous les <tr> dans le conteneur
         const rows = container.querySelectorAll('tr');
-
-        // Parcourir chaque <tr>
         rows.forEach(row => {
-            // Sélectionner le dernier <td> dans le <tr>
             const lastTd = row.querySelector('td:last-child');
-
-            // Si un dernier <td> est trouvé, masquer ce <td>
             if (lastTd) {
                 lastTd.style.display = 'none';
             }
