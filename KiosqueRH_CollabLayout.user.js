@@ -28,7 +28,8 @@
     // Liste de rôles spécifiques avec leur groupe d'attribution
     const Role_employees = {
         "KANE YAYA": 4,
-        "DJAFFRI FARIDA": 3
+        "DJAFFRI FARIDA": 3,
+        "SIBON FRANCK": 1
     };
 
     function getRowsFromContainer(containerId, sliceFrom = 0) {
