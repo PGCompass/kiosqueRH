@@ -23,7 +23,7 @@
         ["TEST", "TEST2"]
     ];
 
-    const Inactive_employees = ["LU JUN", "CISSE AMINATA", "SOW SIMBALA", "BAH ALPHA A", "ID HAISSOU NOUZHA", "DEREVIANKI EMILIE", "MEGUERDITC JEAN MA", "IMAM FATIHA", "DREAN FLORENC", "COMMAILLE ELODIE", "BEN HAMMOU RIDHA", "AMGHAR SABIHA"];
+    const Inactive_employees = ["LU JUN", "CISSE AMINATA", "SOW SIMBALA", "BAH ALPHA A", "ID HAISSOU NOUZHA", "DEREVIANKI EMILIE", "MEGUERDITC JEAN MA", "IMAM FATIHA", "DREAN FLORENC", "COMMAILLE ELODIE", "BEN HAMMOU RIDHA", "AMGHAR SABIHA", "DUCLOS LOIC", "LECLERCQ SARAH", "CABY ANGELIQ"];
 
     // Liste de rôles spécifiques avec leur groupe d'attribution
     const Role_employees = {
