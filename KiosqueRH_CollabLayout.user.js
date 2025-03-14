@@ -31,8 +31,10 @@
         "SIBON FRANCK": 1,
         "APPOLON BEATRIC": 1,
         // EDR
+        "BANVAR CEDRIQU": 3,
         "DJAFFRI FARIDA": 3,
         "HARDION AGNES O": 3,
+        "IMAM FATIHA": 3,
         // PLONGEUR
         "KANE YAYA": 4
     };
