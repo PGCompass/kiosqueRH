@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Mise en page collaborateurs
-// @version      3.3
+// @version      3.4
 // @description  Reorder <tr> elements in the ProdTable within the 'colonne' div based on a predefined list of priorities
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -22,8 +22,6 @@
         ["HOTE(SSE)"],
         ["TEST", "TEST2"]
     ];
-
-    const Inactive_employees = ["LU JUN", "CISSE AMINATA", "SOW SIMBALA", "BAH ALPHA A", "ID HAISSOU NOUZHA", "DEREVIANKI EMILIE", "MEGUERDITC JEAN MA", "DREAN FLORENC", "COMMAILLE ELODIE", "AMGHAR SABIHA", "DUCLOS LOIC", "CABY ANGELIQ", "ABE TEWABEC", "HAMZA MAKRAM","MBEMBA JEANNET"];
 
     // Liste de rôles spécifiques avec leur groupe d'attribution
     const Role_employees = {
