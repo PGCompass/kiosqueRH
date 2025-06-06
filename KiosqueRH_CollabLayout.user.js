@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Mise en page collaborateurs
-// @version      3.1
+// @version      3.2
 // @description  Reorder <tr> elements in the ProdTable within the 'colonne' div based on a predefined list of priorities
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -198,7 +198,10 @@
             const nameElement = row.querySelector('.PRODNomPre');
             const name = nameElement ? nameElement.innerText.trim() : null;
 
-            if (name && Inactive_employees.includes(name)) {
+            const totalHoursCell = row.querySelector('td.ProdNBHTot');
+            const totalHours = totalHoursCell ? parseFloat(totalHoursCell.textContent.trim().replace(',', '.')) : null;
+            
+            if (totalHours !== null && totalHours <= 0) {
                 inactiveRows.push(row);
                 inactiveRows2.push(rows2[i]);
                 return;
