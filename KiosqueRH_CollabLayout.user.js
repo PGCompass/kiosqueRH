@@ -198,7 +198,7 @@
             const nameElement = row.querySelector('.PRODNomPre');
             const name = nameElement ? nameElement.innerText.trim() : null;
 
-            const totalHoursCell = row2.querySelector('td.ProdNBHTot');
+            const totalHoursCell = rows2[i].querySelector('td.ProdNBHTot');
             const totalHours = totalHoursCell ? parseFloat(totalHoursCell.textContent.trim().replace(',', '.')) : null;
             
             if (totalHours !== null && totalHours <= 0) {
