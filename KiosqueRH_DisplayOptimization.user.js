@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Optimisation d'affichage
-// @version      0.1
+// @version      0.2
 // @description  Optimisation de l'affichage
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -38,12 +38,12 @@
         elements[i].style.width = '80%';
     }
 
-    // Fonction pour obtenir la liste des 6 prochains mois (y compris le mois suivant)
+    // Fonction pour obtenir la liste des 8 prochains mois (y compris le mois suivant)
     function getSixNextMonths() {
         var months = [];
         var currentDate = new Date();
 
-        for (var i = 0; i < 6; i++) {
+        for (var i = 0; i < 8; i++) {
             var nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + i + 1, 1);
             var formattedDate = ('0' + (nextMonth.getMonth() + 1)).slice(-2) + '.' + nextMonth.getFullYear(); //.getMonth() + 1)
             months.push(formattedDate);
