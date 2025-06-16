@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Supprimer UR Liste Déroulante
-// @version      1.1
+// @version      1.11
 // @description  Supprime des options spécifiques d'une liste déroulante
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -13,7 +13,10 @@
     'use strict';
 
     // Tableau des valeurs à supprimer
-    var delete_UR = ["234040", "304511", "304540", "960040", "C48002", "C48031", "D05340", "D37511", "D37531", "D37540", "F17540", "032401", "032402", "048401", "236901", "236999", "353401" , "252401", "252411", "651901", "651904", "651911", "663740", "F07803", "470601", "470602", "470699", "G37703", "048403", "014701", "G46240", "G46203"];
+    var delete_UR = ["234040", "234045","304511", "304540", "960040", "C48002", "C48031", "D05340", "D37511", "D37531", "D37540", 
+                     "F17540", "032401", "032402", "048401", "236901", "236999", "353401" , "252401", "252411", "651901", 
+                     "651904", "651911", "663740", "F07803", "470601", "470602", "470699", "G37703", "048403", "014701", 
+                     "G46240", "G46203", "G46245"];
 
     // Tentative de sélection de l'élément par ID
     var selectElement = document.getElementById("UR");
