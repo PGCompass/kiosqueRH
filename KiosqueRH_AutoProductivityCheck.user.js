@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Vérification productivité auto
-// @version      2.02
+// @version      2.1
 // @description  Calcul automatique des productivités
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -135,7 +135,7 @@
                 } else if (NBCOUV == 0) {
                     ajustheure.value = -totalheure;
                     ajustheureint.value = 0;
-                } else if (geturdataProd(codeUR, 1) > 0) {
+                } else if (NBCOUV < 80 && geturdataProd(codeUR, 1) > 0) {
                     ajustheure.value = -totalheure + geturdataProd(codeUR, 2);
                     ajustheureint.value = 0;
                 } else {
