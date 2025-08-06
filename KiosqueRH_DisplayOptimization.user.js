@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Optimisation d'affichage
-// @version      0.2
+// @version      0.3
 // @description  Optimisation de l'affichage
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -77,6 +77,29 @@
             }
         }
     }
+
+    if (bandeauEntete && bandeauEntete.textContent.trim() === "Saisie productivité réalisée") {
+        var menuDeroulant = document.getElementById('PERIODE');
+    
+        if (menuDeroulant) {
+            menuDeroulant.innerHTML = '';
+    
+            var currentDate = new Date();
+    
+            for (var i = 0; i < 13; i++) {
+                var date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+                var month = (date.getMonth() + 1).toString().padStart(2, '0');
+                var year = date.getFullYear();
+                var formatted = year + '-' + month;
+    
+                var option = document.createElement('option');
+                option.value = formatted;
+                option.text = formatted;
+                menuDeroulant.appendChild(option);
+            }
+        }
+    }
+
 
     // Fonction pour masquer les lignes spécifiques
     function hideRows() {
