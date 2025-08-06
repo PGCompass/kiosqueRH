@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Optimisation d'affichage
-// @version      0.3
+// @version      0.31
 // @description  Optimisation de l'affichage
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -90,7 +90,7 @@
                 var date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
                 var month = (date.getMonth() + 1).toString().padStart(2, '0');
                 var year = date.getFullYear();
-                var formatted = year + '-' + month;
+                var formatted = `${month}.${year}`;
     
                 var option = document.createElement('option');
                 option.value = formatted;
@@ -99,6 +99,7 @@
             }
         }
     }
+
 
 
     // Fonction pour masquer les lignes spécifiques
