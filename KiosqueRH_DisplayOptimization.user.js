@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Optimisation d'affichage
-// @version      0.31
+// @version      0.4
 // @description  Optimisation de l'affichage
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
