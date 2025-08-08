@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Mise en page collaborateurs
-// @version      3.46
+// @version      3.47
 // @description  Reorder <tr> elements in the ProdTable within the 'colonne' div based on a predefined list of priorities
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -12,7 +12,6 @@
 (function() {
     'use strict';
 
-    // Liste des priorités par rôles
     const priorities = [
         ["DIR RESTAU", "GERANT(E)", "CHEF GERAN", "RESP PT VE", "MAITRE D'H", "ADJ RESP R", "GERANT ADJ", "APP MAN RE", "RESP POINT", "ASS ADMINI"],
         ["CHEF DE CU", "SECOND CUI", "CUISINIER", "CHEF DE PA", "COMMIS CUI", "CHEF EXECU", "APP CUISI", "CHEF CUISI", "CHEF PRODU", "AIDE DE CU"],
@@ -23,104 +22,85 @@
         ["TEST", "TEST2"]
     ];
 
-    // Liste de rôles spécifiques avec leur groupe d'attribution
     const Role_employees = {
-        // CUISINIER
         "SIBON FRANCK": 1,
         "APPOLON BEATRIC": 1,
-        // EDR
         "BANVAR CEDRIQU": 3,
         "DJAFFRI FARIDA": 3,
         "HARDION AGNES O": 3,
         "IMAM FATIHA": 3,
-        // PLONGEUR
         "KANE YAYA": 4
     };
 
     function getRowsFromContainer(containerId, sliceFrom = 0) {
         const container = document.getElementById(containerId);
         if (!container) return [];
-
         const table = container.querySelector('table.ProdTable');
         if (!table) return [];
-
         return Array.from(table.querySelectorAll(':scope > tbody > tr, :scope > tr')).slice(sliceFrom);
     }
 
     function getSecondDivRows(sliceFrom = 0) {
         const colonneDiv = document.getElementById('colonne');
         if (!colonneDiv) return [];
-
         const nextDiv = colonneDiv.nextElementSibling;
         if (!nextDiv) return [];
-
         return Array.from(nextDiv.getElementsByTagName('tr')).slice(sliceFrom);
     }
 
-
     function writeDataToRows(data) {
         const colonneDiv = document.getElementById('colonne');
-        const rows = Array.from(colonneDiv.querySelectorAll('td.ProdTitreLigne'));
+        const allTd = Array.from(colonneDiv.querySelectorAll('td.ProdTitreLigne'));
 
-        let targetRowIndex = -1;
-        rows.forEach((row, index) => {
-            if (row && row.textContent.trim() === "Total Salariés") {
-                targetRowIndex = index;
-            }
-        });
+        // Trouver ou créer les lignes
+        let rowCuisinier = allTd.find(td => td.textContent.trim() === "Nombre de cuisinier")?.parentElement;
+        let rowEDR       = allTd.find(td => td.textContent.trim() === "Nombre d'EDR")?.parentElement;
+        let rowPlongeur  = allTd.find(td => td.textContent.trim() === "Nombre de plongeur")?.parentElement;
 
-        if (rows.length >= 3) {
-            const firstTdPenultimate2 = rows[targetRowIndex];
-            if (firstTdPenultimate2) {
-                firstTdPenultimate2.textContent = "Nombre de cuisinier";
-                firstTdPenultimate2.style.textAlign = 'right';
-                firstTdPenultimate2.style.fontWeight = 'bold';
-            }
+        function createRow(label) {
+            const tr = document.createElement('tr');
+            const td = document.createElement('td');
+            td.className = "ProdTitreLigne";
+            td.textContent = label;
+            td.style.textAlign = 'right';
+            td.style.fontWeight = 'bold';
+            tr.appendChild(td);
+            return tr;
+        }
 
-            const firstTdPenultimate1 = rows[rows.length - 2];
-            if (firstTdPenultimate1) {
-                firstTdPenultimate1.textContent = "Nombre d'EDR";
-                firstTdPenultimate1.style.textAlign = 'right';
-                firstTdPenultimate1.style.fontWeight = 'bold';
-            }
+        if (!rowCuisinier) rowCuisinier = createRow("Nombre de cuisinier");
+        if (!rowEDR)       rowEDR       = createRow("Nombre d'EDR");
+        if (!rowPlongeur)  rowPlongeur  = createRow("Nombre de plongeur");
 
-            const firstTdLast = rows[rows.length - 1];
-            if (firstTdLast) {
-                firstTdLast.textContent = "Nombre de plongeur";
-                firstTdLast.style.textAlign = 'right';
-                firstTdLast.style.fontWeight = 'bold';
-            }
-        } else {
-            console.error('Il n\'y a pas assez de <tr> dans colonneDiv');
+        // Réinsérer dans le bon ordre après "Total Salariés"
+        const totalRow = allTd.find(td => td.textContent.trim() === "Total Salariés")?.parentElement;
+        if (totalRow) {
+            const tbody = totalRow.parentElement;
+            tbody.insertBefore(rowCuisinier, totalRow.nextSibling);
+            tbody.insertBefore(rowEDR, rowCuisinier.nextSibling);
+            tbody.insertBefore(rowPlongeur, rowEDR.nextSibling);
         }
 
         const lastDiv = colonneDiv.nextElementSibling;
         const rowsLastDiv = Array.from(lastDiv.querySelectorAll('tr'));
-        const penultimate2Row = rowsLastDiv[targetRowIndex + 5];
-        const penultimate1Row = lastDiv.querySelector('tr:nth-last-of-type(2)');
-        const lastRow = lastDiv.querySelector('tr:last-of-type');
+
+        const penultimate2Row = rowCuisinier;
+        const penultimate1Row = rowEDR;
+        const lastRow         = rowPlongeur;
 
         const tablesProd = document.querySelectorAll('.ProdTable');
         const lastTableProd = tablesProd[tablesProd.length - 1];
+
         const getNumericInputValue = (row, column) => parseFloat(
             lastTableProd.querySelectorAll('tr')[row].querySelectorAll('td')[column].querySelector('input')?.value.trim().replace(',', '.') || 0
         );
 
-
-        if (!penultimate1Row || !lastRow) {
-            console.error('Les lignes spécifiées ne sont pas trouvées dans les divs');
-            return;
-        }
-
-        const writeDataInRow = (row, data) => {
+        const writeDataInRow = (row, dataset) => {
             const cells = row.querySelectorAll('td.ProdNBH');
             const cells_tot = row.querySelectorAll('td.ProdNBHTot');
-            cells_tot[0].textContent = "";
+            if (cells_tot[0]) cells_tot[0].textContent = "";
 
-            let index = 0;
-            // Si 'data' est vide ou mal défini, on met "" dans toutes les cellules
-            if (!data || Object.keys(data).length === 0) {
-                // Si 'data' est vide, mettre "" dans toutes les cellules
+            if (!dataset || Object.keys(dataset).length === 0) {
                 cells.forEach(cell => {
                     cell.textContent = "";
                     cell.style.textAlign = "center";
@@ -129,22 +109,21 @@
                 return;
             }
 
-            // Si 'data' est valide, on écrit les valeurs dans les cellules
-            for (const key in data) {
+            let index = 0;
+            for (const key in dataset) {
                 if (index < cells.length) {
                     const couverts = getNumericInputValue(0, index + 1);
-                    cells[index].textContent = data[key] === 0 ? "" : data[key];
+                    cells[index].textContent = dataset[key] === 0 ? "" : dataset[key];
                     cells[index].style.textAlign = "center";
                     cells[index].style.fontWeight = "bold";
-                    if (couverts == 0 && data[key] > 0) {cells[index].style.backgroundColor = '#FF0000'};
+                    if (couverts == 0 && dataset[key] > 0) {
+                        cells[index].style.backgroundColor = '#FF0000';
+                    }
                     index++;
-                } else {
-                    break;
                 }
             }
         };
 
-        // Si 'data' est vide ou mal défini, on applique "" dans les lignes correspondantes
         writeDataInRow(penultimate2Row, data[1] || {});
         writeDataInRow(penultimate1Row, data[3] || {});
         writeDataInRow(lastRow, data[4] || {});
@@ -153,21 +132,11 @@
     const hoursTable = [];
 
     function addHours(qualificationId, htmlContent) {
-        if (!(htmlContent instanceof HTMLElement)) {
-            console.error('htmlContent doit être un élément DOM');
-            return;
-        }
-
-        const allDays = htmlContent.querySelectorAll('td');
-        const days = Array.from(allDays).slice(1, -1);
-
+        if (!(htmlContent instanceof HTMLElement)) return;
+        const days = Array.from(htmlContent.querySelectorAll('td')).slice(1, -1);
         days.forEach((day, index) => {
             const hours = parseFloat(day.textContent.trim().replace(',', '.'));
-            if (isNaN(hours)) {
-                console.warn(`Heures invalides pour l'élément à l'index ${index}: "${day.textContent}"`);
-                return;
-            }
-
+            if (isNaN(hours)) return;
             if (!hoursTable[qualificationId]) hoursTable[qualificationId] = {};
             if (!hoursTable[qualificationId][index]) hoursTable[qualificationId][index] = 0;
             if (hours > 0) hoursTable[qualificationId][index] += 1;
@@ -192,13 +161,11 @@
         rows.forEach((row, i) => {
             const roleElement = row.querySelector('.PRODFonc');
             const role = roleElement ? roleElement.innerText.trim() : null;
-
             const nameElement = row.querySelector('.PRODNomPre');
             const name = nameElement ? nameElement.innerText.trim() : null;
-
             const totalHoursCell = rows2[i].querySelector('td.ProdNBHTot');
             const totalHours = totalHoursCell ? parseFloat(totalHoursCell.textContent.trim().replace(',', '.')) : null;
-            
+
             if (totalHours !== null && totalHours <= 0) {
                 inactiveRows.push(row);
                 inactiveRows2.push(rows2[i]);
@@ -206,7 +173,6 @@
             }
 
             let isSorted = false;
-
             if (name && Role_employees.hasOwnProperty(name)) {
                 const specificGroupIndex = Role_employees[name];
                 sortedRows[specificGroupIndex].push(row);
@@ -254,10 +220,8 @@
 
     if (colonneRows.length > 0 && colonneRows2.length > 0) {
         const { sortedRows, sortedRows2 } = sortAndGroupRows(colonneRows, colonneRows2);
-
         const mainTableBody = document.querySelector('div#colonne table.ProdTable tbody') || document.querySelector('div#colonne table.ProdTable');
         const secondTable = document.querySelector('div#colonne').nextElementSibling.querySelector('table');
-
         insertRowsIntoTable(sortedRows, mainTableBody);
         insertRowsIntoTable(sortedRows2, secondTable);
     }
@@ -266,16 +230,11 @@
         const rows = container.querySelectorAll('tr');
         rows.forEach(row => {
             const lastTd = row.querySelector('td:last-child');
-            if (lastTd) {
-                lastTd.style.display = 'none';
-            }
+            if (lastTd) lastTd.style.display = 'none';
         });
     }
 
-    const secondDiv = document.getElementById('ligne');
-    const colonneDiv = document.getElementById('colonne');
-    const lastDiv = colonneDiv.nextElementSibling;
-    hideLastTdInRows(secondDiv);
-    hideLastTdInRows(lastDiv);
+    hideLastTdInRows(document.getElementById('ligne'));
+    hideLastTdInRows(document.getElementById('colonne').nextElementSibling);
 
 })();
