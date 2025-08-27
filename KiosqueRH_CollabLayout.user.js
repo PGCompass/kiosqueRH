@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Mise en page collaborateurs
-// @version      3.46
+// @version      3.47
 // @description  Reorder <tr> elements in the ProdTable within the 'colonne' div based on a predefined list of priorities
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -57,7 +57,6 @@
         return Array.from(nextDiv.getElementsByTagName('tr')).slice(sliceFrom);
     }
 
-
     function writeDataToRows(data) {
         const colonneDiv = document.getElementById('colonne');
         const rows = Array.from(colonneDiv.querySelectorAll('td.ProdTitreLigne'));
@@ -70,26 +69,26 @@
         });
 
         if (rows.length >= 3) {
-            const firstTdPenultimate2 = rows[targetRowIndex];
-            if (firstTdPenultimate2) {
-                firstTdPenultimate2.textContent = "Nombre de cuisinier";
-                firstTdPenultimate2.style.textAlign = 'right';
-                firstTdPenultimate2.style.fontWeight = 'bold';
-            }
+            // On récupère les 3 lignes à déplacer
+            const rowCuisinier = rows[targetRowIndex].closest("tr");
+            const rowEDR       = rows[rows.length - 2].closest("tr");
+            const rowPlongeur  = rows[rows.length - 1].closest("tr");
 
-            const firstTdPenultimate1 = rows[rows.length - 2];
-            if (firstTdPenultimate1) {
-                firstTdPenultimate1.textContent = "Nombre d'EDR";
-                firstTdPenultimate1.style.textAlign = 'right';
-                firstTdPenultimate1.style.fontWeight = 'bold';
-            }
+            // On renomme
+            rowCuisinier.querySelector("td.ProdTitreLigne").textContent = "Nombre de cuisinier";
+            rowEDR.querySelector("td.ProdTitreLigne").textContent = "Nombre d'EDR";
+            rowPlongeur.querySelector("td.ProdTitreLigne").textContent = "Nombre de plongeur";
 
-            const firstTdLast = rows[rows.length - 1];
-            if (firstTdLast) {
-                firstTdLast.textContent = "Nombre de plongeur";
-                firstTdLast.style.textAlign = 'right';
-                firstTdLast.style.fontWeight = 'bold';
-            }
+            [rowCuisinier, rowEDR, rowPlongeur].forEach(r => {
+                r.querySelector("td.ProdTitreLigne").style.textAlign = "right";
+                r.querySelector("td.ProdTitreLigne").style.fontWeight = "bold";
+            });
+
+            // On les place au tout début du tableau
+            const table = colonneDiv.querySelector("table.ProdTable tbody") || colonneDiv.querySelector("table.ProdTable");
+            table.insertBefore(rowPlongeur, table.firstChild);
+            table.insertBefore(rowEDR, table.firstChild);
+            table.insertBefore(rowCuisinier, table.firstChild);
         } else {
             console.error('Il n\'y a pas assez de <tr> dans colonneDiv');
         }
@@ -106,7 +105,6 @@
             lastTableProd.querySelectorAll('tr')[row].querySelectorAll('td')[column].querySelector('input')?.value.trim().replace(',', '.') || 0
         );
 
-
         if (!penultimate1Row || !lastRow) {
             console.error('Les lignes spécifiées ne sont pas trouvées dans les divs');
             return;
@@ -118,9 +116,7 @@
             cells_tot[0].textContent = "";
 
             let index = 0;
-            // Si 'data' est vide ou mal défini, on met "" dans toutes les cellules
             if (!data || Object.keys(data).length === 0) {
-                // Si 'data' est vide, mettre "" dans toutes les cellules
                 cells.forEach(cell => {
                     cell.textContent = "";
                     cell.style.textAlign = "center";
@@ -129,7 +125,6 @@
                 return;
             }
 
-            // Si 'data' est valide, on écrit les valeurs dans les cellules
             for (const key in data) {
                 if (index < cells.length) {
                     const couverts = getNumericInputValue(0, index + 1);
@@ -144,8 +139,7 @@
             }
         };
 
-        // Si 'data' est vide ou mal défini, on applique "" dans les lignes correspondantes
-        writeDataInRow(penultimate2Row, data[1] || {});
+        writeDataInRow(rowsLastDiv[targetRowIndex + 5], data[1] || {});
         writeDataInRow(penultimate1Row, data[3] || {});
         writeDataInRow(lastRow, data[4] || {});
     }
