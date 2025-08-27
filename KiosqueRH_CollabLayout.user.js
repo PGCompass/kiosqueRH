@@ -164,7 +164,6 @@
         days.forEach((day, index) => {
             const hours = parseFloat(day.textContent.trim().replace(',', '.'));
             if (isNaN(hours)) {
-                console.warn(Heures invalides pour l'élément à l'index ${index}: "${day.textContent}");
                 return;
             }
 
