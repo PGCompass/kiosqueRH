@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Mise en page collaborateurs
-// @version      3.46
+// @version      3.47
 // @description  Reorder <tr> elements in the ProdTable within the 'colonne' div based on a predefined list of priorities
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -16,7 +16,7 @@
   // Chaque sous-tableau = un groupe (index 0,1,2,...). L'ordre détermine le tri.
   // NB: la correspondance est une égalité stricte via .includes(role) dans sortAndGroupRows.
   const priorities = [
-    ["DIR RESTAU", "GERANT(E)", "CHEF GERAN", "RESP PT VE", "MAITRE D'H", "ADJ RESP R", "GERANT ADJ", "APP MAN RE", "RESP POINT", "ASS ADMINI"],
+    ["DIR RESTAU", "GERANT(E)", "CHEF GERAN", "RESP PT VE", "MAITRE D'H", "ADJ RESP R", "GERANT ADJ", "APP MAN RE", "RESP POINT", "ASS ADMINI", "APP MARKET"],
     ["CHEF DE CU", "SECOND CUI", "CUISINIER", "CHEF DE PA", "COMMIS CUI", "CHEF EXECU", "APP CUISI", "CHEF CUISI", "CHEF PRODU", "AIDE DE CU"],
     ["CHEF PATIS", "PATISSIER(", "COMMIS PAT"],
     ["EMPL POLY", "EMP REST C", "EMPL RESTA", "EMPL DE RE","EMP QUALIF", "CAISSIER (", "EMP TECH R", "RESP PREPA","CHEF DE GR", "CAISSIER R", "EMPLOYE SE", "EMP TECH S", "EMP POLY R"],
