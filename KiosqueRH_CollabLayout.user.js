@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Mise en page collaborateurs
-// @version      3.47
+// @version      3.48
 // @description  Reorder <tr> elements in the ProdTable within the 'colonne' div based on a predefined list of priorities
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -37,6 +37,7 @@
     "DJAFFRI FARIDA": 3,
     "HARDION AGNES O": 3,
     "IMAM FATIHA": 3,
+    "ROUSSY SABINE": 3,
     // PLONGEUR
     "KANE YAYA": 4
   };
