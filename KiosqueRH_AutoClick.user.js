@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         KiosqueRH - Auto Click menu deroulant
-// @version      1.3
+// @version      1.4
 // @description  Supprime certaines actions onchange et conserve ValidationUR tout en automatisant le clic sur un bouton
-// @author       Vous
+// @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
 // @updateURL    https://github.com/PGCompass/kiosqueRH/raw/refs/heads/main/KiosqueRH_AutoClick.user.js
 // @downloadURL  https://github.com/PGCompass/kiosqueRH/raw/refs/heads/main/KiosqueRH_AutoClick.user.js
