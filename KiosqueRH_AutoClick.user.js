@@ -1,6 +1,5 @@
 // ==UserScript==
 // @name         KiosqueRH - Auto Click menu deroulant
-// @namespace    http://tampermonkey.net/
 // @version      1.3
 // @description  Supprime certaines actions onchange et conserve ValidationUR tout en automatisant le clic sur un bouton
 // @author       Vous
