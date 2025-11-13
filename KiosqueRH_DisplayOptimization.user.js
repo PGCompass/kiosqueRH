@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         KiosqueRH - Optimisation d'affichage
-// @version      0.4
-// @description  Optimisation de l'affichage
+// @version      0.5
+// @description  Optimisation de l'affichage (version corrigée DOM dynamique)
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
 // @require      http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
@@ -10,166 +10,113 @@
 // @grant        none
 // ==/UserScript==
 
-(function() {
-    'use strict';
-    var $ = window.jQuery;
-    $('.general').css('width', '2200px').css('height', '1000px');
-    $('.PRODNomPre').css('height', '17px');
-    $('.ProdNBHTot').css('height', '16px');
-    $('.prodDonneesTotDroite').css('width', '80px');
+(function () {
+  'use strict';
+  const $ = window.jQuery;
 
-    // Sélectionnez la div avec la classe "general"
-    var generalDiv = document.querySelector('.general');
+  // --- Styles généraux immédiats
+  $('.general').css({ width: '2200px', height: '1000px' });
+  $('.PRODNomPre').css('height', '17px');
+  $('.ProdNBHTot').css('height', '16px');
+  $('.prodDonneesTotDroite').css('width', '80px');
 
-    // Vérifiez si la div avec la classe "general" a au moins 4 div enfants
-    if (generalDiv && generalDiv.children.length >= 4) {
-        // Sélectionnez la quatrième div (index 3 car les indices commencent à 0)
-        var quatriemeDiv = generalDiv.children[3];
+  const generalDiv = document.querySelector('.general');
+  if (generalDiv && generalDiv.children.length >= 4) {
+    const quatriemeDiv = generalDiv.children[3];
+    quatriemeDiv.style.width = '100%';
+    quatriemeDiv.style.height = '100%';
+  }
 
-        // Modifiez les styles de la quatrième div comme vous le souhaitez
-        quatriemeDiv.style.width = '100%';
-        quatriemeDiv.style.height = '100%';
-        // Ajoutez d'autres modifications de style au besoin
+  Array.from(document.getElementsByClassName('etat120Corps')).forEach(el => {
+    el.style.width = '80%';
+  });
+
+  // --- Génération des mois
+  function getSixNextMonths() {
+    const months = [];
+    const currentDate = new Date();
+    for (let i = 0; i < 8; i++) {
+      const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + i + 1, 1);
+      const formattedDate = ('0' + (nextMonth.getMonth() + 1)).slice(-2) + '.' + nextMonth.getFullYear();
+      months.push(formattedDate);
     }
+    return months;
+  }
 
-    // Sélectionner tous les éléments avec la classe "etat120Corps" et modifier leur largeur
-    var elements = document.getElementsByClassName('etat120Corps');
-    for (var i = 0; i < elements.length; i++) {
-        elements[i].style.width = '80%';
+  const bandeauEntete = document.querySelector('.BandeauEntete');
+  if (bandeauEntete && bandeauEntete.textContent.trim() === 'Saisie productivité prévisionnelle') {
+    const menu = document.getElementById('PERIODE');
+    if (menu) {
+      menu.innerHTML = '';
+      getSixNextMonths().forEach(date => {
+        const opt = document.createElement('option');
+        opt.value = date;
+        opt.text = date;
+        menu.appendChild(opt);
+      });
     }
+  }
 
-    // Fonction pour obtenir la liste des 8 prochains mois (y compris le mois suivant)
-    function getSixNextMonths() {
-        var months = [];
-        var currentDate = new Date();
-
-        for (var i = 0; i < 8; i++) {
-            var nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + i + 1, 1);
-            var formattedDate = ('0' + (nextMonth.getMonth() + 1)).slice(-2) + '.' + nextMonth.getFullYear(); //.getMonth() + 1)
-            months.push(formattedDate);
-        }
-
-        return months;
-    }
-
-    // Sélectionnez la classe "BandeauEntete"
-    var bandeauEntete = document.querySelector('.BandeauEntete');
-
-    // Vérifiez si la classe "BandeauEntete" existe et contient le texte spécifique
-    if (bandeauEntete && bandeauEntete.textContent.trim() === "Saisie productivité prévisionnelle") {
-        // Sélectionnez le menu déroulant existant
-        var menuDeroulant = document.getElementById('PERIODE');
-
-        // Vérifiez si le menu déroulant existe
-        if (menuDeroulant) {
-            // Supprimez toutes les options existantes
-            menuDeroulant.innerHTML = '';
-
-            // Obtenez les 6 prochains mois
-            var sixNextMonths = getSixNextMonths();
-
-            // Ajoutez les options au menu déroulant
-            for (var j = 0; j < sixNextMonths.length; j++) {
-                var option = document.createElement('option');
-                option.value = sixNextMonths[j];
-                option.text = sixNextMonths[j];
-                menuDeroulant.appendChild(option);
+    if (bandeauEntete && bandeauEntete.textContent.trim() === 'Saisie productivité réalisée') {
+        const menu = document.getElementById('PERIODE');
+        if (menu) {
+            menu.innerHTML = '';
+            const now = new Date();
+            for (let z = 0; z < 13; z++) {  // du plus récent au plus ancien
+                const d = new Date(now.getFullYear(), now.getMonth() - z, 1);
+                const formatted = `${(d.getMonth() + 1).toString().padStart(2, '0')}.${d.getFullYear()}`;
+                const opt = document.createElement('option');
+                opt.value = formatted;
+                opt.text = formatted;
+                menu.appendChild(opt);
             }
+            // sélectionner le dernier mois du menu (le plus ancien)
+            menu.selectedIndex = menu.options.length - 1;
         }
     }
 
-    if (bandeauEntete && bandeauEntete.textContent.trim() === "Saisie productivité réalisée") {
-        var menuDeroulant = document.getElementById('PERIODE');
-    
-        if (menuDeroulant) {
-            menuDeroulant.innerHTML = '';
-    
-            var currentDate = new Date();
-    
-            for (var i = 0; i < 13; i++) {
-                var date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
-                var month = (date.getMonth() + 1).toString().padStart(2, '0');
-                var year = date.getFullYear();
-                var formatted = `${month}.${year}`;
-    
-                var option = document.createElement('option');
-                option.value = formatted;
-                option.text = formatted;
-                menuDeroulant.appendChild(option);
-            }
-        }
-    }
-
-
-
-    // Fonction pour masquer les lignes spécifiques
-    function hideRows() {
-        const colonneDiv = document.getElementById('colonne');
-        if (!colonneDiv) return;
-
-        const lastDiv = colonneDiv.nextElementSibling;
-        if (!lastDiv) return;
-
-        const rows = colonneDiv.querySelectorAll('tr');
-        const lastDivRows = lastDiv.querySelectorAll('tr');
-
-        // Masquer les lignes dans le div avec l'ID 'colonne' et dans la dernière div
-        [1, 7, 10, 11, 12, 13, 14, 15, 17, 19, 20, 21, 22, 23, 24, 25].forEach(index => {
-            if (rows[index]) {
-                rows[index].style.display = 'none'; // masquer à gauche
-            }
-        });
-        [1, 7, 10, 11, 12, 13, 14, 15, 17, 19, 20, 21, 22, 23].forEach(index => {
-            if (lastDivRows[index]) {
-                lastDivRows[index].style.display = 'none'; // masquer à droite
-            }
-            if (lastDivRows[16]) {
-                lastDivRows[16].style.color = '#FF0000';
-                lastDivRows[16].style.fontWeight = 'bold';
-            }
-        });
-    }
-
-    // Exécution du script
-    hideRows(); // Lancer la fonction
-
-
-    // Modifier la hauteur du TD du 14e TR dans la dernière colonne de lastDiv
+  // --- Partie principale : attendre le DOM ADP
+  const checkExist = setInterval(() => {
     const colonneDiv = document.getElementById('colonne');
+    if (!colonneDiv) return;
+
     const lastDiv = colonneDiv.nextElementSibling;
-    if (lastDiv) {
-        var tdElementInLastDiv = lastDiv.querySelector('tr:nth-child(14)');
-        if (tdElementInLastDiv) {
-            tdElementInLastDiv.style.height = '35px'
-        } else {
-            console.log("L'élément TD cible dans lastDiv n'a pas été trouvé.");
-        }
-    } else {
-        console.log("lastDiv n'a pas été trouvé.");
+    if (!lastDiv) return;
+
+    clearInterval(checkExist); // Stopper l’attente
+
+    // Masquer des lignes précises
+    const rows = colonneDiv.querySelectorAll('tr');
+    const lastDivRows = lastDiv.querySelectorAll('tr');
+    [1, 7, 10, 11, 12, 13, 14, 15, 17, 19, 20, 21, 22, 23, 24, 25].forEach(i => {
+      if (rows[i]) rows[i].style.display = 'none';
+    });
+    [1, 7, 10, 11, 12, 13, 14, 15, 17, 19, 20, 21, 22, 23].forEach(i => {
+      if (lastDivRows[i]) lastDivRows[i].style.display = 'none';
+    });
+    if (lastDivRows[16]) {
+      lastDivRows[16].style.color = '#FF0000';
+      lastDivRows[16].style.fontWeight = 'bold';
     }
 
-    var tdElements = colonneDiv.querySelectorAll('td.ProdTitreLigne');
-    var count = tdElements.length;
-    if (count >= 3) {
-        for (var k = count - 3; k < count; k++) {
-            tdElements[k].style.height = '16px'; // Changez '50px' à la hauteur souhaitée
-        }
-    } else {
-        console.log("Moins de 3 éléments avec la classe ProdTitreLigne trouvés.");
+    // Ajustements divers
+    const td14 = lastDiv.querySelector('tr:nth-child(14)');
+    if (td14) td14.style.height = '35px';
+
+    const tdElements = colonneDiv.querySelectorAll('td.ProdTitreLigne');
+    if (tdElements.length >= 3) {
+      for (let k = tdElements.length - 3; k < tdElements.length; k++) {
+        tdElements[k].style.height = '16px';
+      }
     }
 
-    var firstTrInLastDiv = lastDiv.querySelector('tr:first-child');
-    if (firstTrInLastDiv) {
-        var proddonneebleuDivs = firstTrInLastDiv.querySelectorAll('td.prodDonneesBleu');
-        if (proddonneebleuDivs.length > 0) {
-            proddonneebleuDivs.forEach(function(div) {
-                div.style.backgroundColor = '#66FF66'; // Changez 'red' à la couleur souhaitée
-            });
-        } else {
-            console.log("Aucun élément td.prodDonneesBleu n'a été trouvé dans le premier TR de lastDiv.");
-        }
-    } else {
-        console.log("Le premier TR n'a pas été trouvé dans lastDiv.");
+    const firstTr = lastDiv.querySelector('tr:first-child');
+    if (firstTr) {
+      firstTr.querySelectorAll('td.prodDonneesBleu').forEach(td => {
+        td.style.backgroundColor = '#66FF66';
+      });
     }
+
+  }, 500);
 
 })();
