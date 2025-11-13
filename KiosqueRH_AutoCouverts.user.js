@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         KiosqueRH – Couverts automatique
+// @name         KiosqueRH - Couverts automatique
 // @version      1.0
 // @description  Ajout des couverts en automatique
 // @author       Pierre GARDIE - Compass Group France
