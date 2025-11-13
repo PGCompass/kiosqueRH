@@ -5,8 +5,8 @@
 // @description  Supprime certaines actions onchange et conserve ValidationUR tout en automatisant le clic sur un bouton
 // @author       Vous
 // @match        https://hr-services.fr.adp.com/*
-// @updateURL    
-// @downloadURL  
+// @updateURL    https://github.com/PGCompass/kiosqueRH/raw/refs/heads/main/KiosqueRH_AutoClick.user.js
+// @downloadURL  https://github.com/PGCompass/kiosqueRH/raw/refs/heads/main/KiosqueRH_AutoClick.user.js
 // @grant        none
 // ==/UserScript==
 
