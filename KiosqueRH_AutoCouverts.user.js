@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH – Couverts automatique
-// @version      1.2
+// @version      1.3
 // @description  Ajout des couverts en automatique
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -15,7 +15,7 @@
     'use strict';
 
     const CouvertsUR = [
-        ["234001",  60,  60,  50,  15,  15, 10,  0, 50],
+        ["234001",  60,  60,  40,  20,  20, 10,  0, 50],
         ["304501", 320, 380, 320, 300, 110, 10,  0, 50],
         ["960001", 680, 660, 650, 630, 400, 10, 15, 50],
         ["C48001", 350, 380, 300, 370, 210, 10,  0, 50],
@@ -37,18 +37,18 @@
         ["Vacances d’été 2026", "2026-07-04", "2026-09-01"]
     ];
 
-    // Ramadan
     const ramadan = [
         ["Ramadan 2026", "2026-02-17", "2026-03-19", 10]
     ];
 
-    // Période d'aout
     const aout = [
         ["aout 2026", "2026-07-27", "2026-08-21"]
     ];
 
+    const finaout = [
+        ["finaout 2026", "2026-08-24", "2026-09-04", 20]
+    ];
 
-    // Vendredi veille vacances : -15%
     const veillevacances = 15;
 
     const codeUR = $('#CODE_UR').val();
@@ -58,126 +58,114 @@
     annee = parseInt(annee);
 
     function getNomJourById(id) {
-        const cells = document.querySelectorAll('#ligne table.ProdTable tr:first-of-type td.ProdDonneesCal');
-        if (!cells[id]) return "";
-        return cells[id].innerText.replace(/\u00A0/g, '').split('\n')[0].trim();
+        const c = document.querySelectorAll('#ligne table.ProdTable tr:first-of-type td.ProdDonneesCal');
+        if (!c[id]) return "";
+        return c[id].innerText.replace(/\u00A0/g, '').split('\n')[0].trim();
     }
 
     function getJourById(id) {
-        const cells = document.querySelectorAll('#ligne table.ProdTable tr:first-of-type td.ProdDonneesCal');
-        if (!cells[id]) return "";
-        return cells[id].innerText.replace(/\u00A0/g, '').split('\n')[1].replace(/^0/, '').trim();
+        const c = document.querySelectorAll('#ligne table.ProdTable tr:first-of-type td.ProdDonneesCal');
+        if (!c[id]) return "";
+        return c[id].innerText.replace(/\u00A0/g, '').split('\n')[1].replace(/^0/, '').trim();
     }
 
     function getTypeJourById(id) {
-        const cells = Array.from(document.querySelectorAll('#ligne table.ProdTable tr:nth-of-type(2) td.ProdDonneesCal')).slice(1);
-        if (!cells[id]) return "";
-        return cells[id].innerText.replace(/\u00A0/g, '').trim();
+        const c = Array.from(document.querySelectorAll('#ligne table.ProdTable tr:nth-of-type(2) td.ProdDonneesCal')).slice(1);
+        if (!c[id]) return "";
+        return c[id].innerText.replace(/\u00A0/g, '').trim();
     }
 
-    function estVacances(jour, mois, annee) {
-        const date = new Date(annee, mois - 1, jour);
-        for (let vac of vacances) {
-            if (date >= new Date(vac[1]) && date <= new Date(vac[2])) return true;
-        }
-        return false;
+    function estVacances(j, m, a) {
+        const d = new Date(a, m - 1, j);
+        return vacances.some(v => d >= new Date(v[1]) && d <= new Date(v[2]));
     }
 
-    function estRamadan(jour, mois, annee) {
-        const date = new Date(annee, mois - 1, jour);
+    function estRamadan(j, m, a) {
+        const d = new Date(a, m - 1, j);
         for (let r of ramadan) {
-            const debut = new Date(r[1]);
-            const fin = new Date(r[2]);
-            if (date >= debut && date <= fin) return r[3];
+            if (d >= new Date(r[1]) && d <= new Date(r[2])) return r[3];
         }
         return 0;
     }
 
-    function estPeriodeAout(jour, mois, annee) {
-        const date = new Date(annee, mois - 1, jour);
-        for (let p of aout) {
-            const debut = new Date(p[1]);
-            const fin = new Date(p[2]);
-            if (date >= debut && date <= fin) return true;
-        }
-        return false;
+    function estPeriodeAout(j, m, a) {
+        const d = new Date(a, m - 1, j);
+        return aout.some(v => d >= new Date(v[1]) && d <= new Date(v[2]));
     }
 
-    function estVeilleVacances(jour, mois, annee) {
-        const date = new Date(annee, mois - 1, jour);
-        const lendemain = new Date(date);
-        lendemain.setDate(date.getDate() + 1);
-
-        for (let vac of vacances) {
-            if (lendemain.toDateString() === new Date(vac[1]).toDateString()) return true;
+    function estFinAout(j, m, a) {
+        const d = new Date(a, m - 1, j);
+        for (let p of finaout) {
+            if (d >= new Date(p[1]) && d <= new Date(p[2])) return p[3];
         }
-        return false;
+        return 0;
+    }
+
+    function estVeilleVacances(j, m, a) {
+        const d = new Date(a, m - 1, j);
+        const lend = new Date(d);
+        lend.setDate(lend.getDate() + 1);
+        return vacances.some(v => lend.toDateString() === new Date(v[1]).toDateString());
     }
 
     function appliquerCouverts() {
-        const urData = CouvertsUR.find(u => u[0] === codeUR);
-        if (!urData) return;
+        const ur = CouvertsUR.find(u => u[0] === codeUR);
+        if (!ur) return;
 
-        const colonnes = $('#ligne table.ProdTable tr:first-of-type td.ProdDonneesCal');
+        $('#ligne table.ProdTable tr:first-of-type td.ProdDonneesCal').each(function(i) {
 
-        colonnes.each(function(i) {
-            let nomJour = getNomJourById(i);
-            const jourNum = parseInt(getJourById(i));
-            const typeJour = getTypeJourById(i);
-
-            let idxJour = ["LU", "MA", "ME", "JE", "VE"].indexOf(nomJour);
+            let nom = getNomJourById(i);
+            const j = parseInt(getJourById(i));
+            const type = getTypeJourById(i);
+            let idx = ["LU","MA","ME","JE","VE"].indexOf(nom);
             let couvert = 0;
 
-            const nextTypeJour = getTypeJourById(i + 1);
-            if (nextTypeJour === "JFER" && nomJour !== "VE" && nomJour !== "SA" && nomJour !== "DI") {
-                idxJour = 4;
-            }
+            const nextType = getTypeJourById(i + 1);
+            if (nextType === "JFER" && !["VE","SA","DI"].includes(nom)) idx = 4;
 
-            if (idxJour !== -1 && typeJour !== "JFER") {
-                couvert = urData[idxJour + 1];
+            if (idx !== -1 && type !== "JFER") {
+                couvert = ur[idx + 1];
 
-                // ===== AOUT (prioritaire) =====
-                if (estPeriodeAout(jourNum, mois, annee)) {
-                    let pctAout = urData[8]; // nouvelle colonne
+                // ===== AOÛT (prioritaire, exclusif) =====
+                if (estPeriodeAout(j, mois, annee)) {
+                    let pctAout = ur[8];
                     couvert = Math.round(couvert * (1 - pctAout / 100) / 5) * 5;
-                    // On saute toutes les autres baisses
                 }
 
-                // ===== sinon règles normales =====
+                // ===== FIN AOÛT (cumulable) =====
                 else {
+                    let pctFinAout = estFinAout(j, mois, annee);
+                    if (pctFinAout > 0) {
+                        couvert = Math.round(couvert * (1 - pctFinAout / 100) / 5) * 5;
+                    }
 
-                    // Vacances
-                    if (estVacances(jourNum, mois, annee)) {
-                        let reduction = urData[6];
+                    // VACANCES
+                    if (estVacances(j, mois, annee)) {
+                        let reduction = ur[6];
                         couvert = Math.round(couvert * (1 - reduction / 100) / 5) * 5;
                     }
 
-                    // Ramadan
-                    let ramadanPct = estRamadan(jourNum, mois, annee);
+                    // RAMADAN
+                    let ramadanPct = estRamadan(j, mois, annee);
                     if (ramadanPct > 0) {
-                        if (estVacances(jourNum, mois, annee)) {
-                            ramadanPct = ramadanPct / 2;
-                        }
+                        if (estVacances(j, mois, annee)) ramadanPct /= 2;
                         couvert = Math.round(couvert * (1 - ramadanPct / 100) / 5) * 5;
                     }
 
                     // Vendredi veille vacances
-                    if (nomJour === "VE" && estVeilleVacances(jourNum, mois, annee)) {
+                    if (nom === "VE" && estVeilleVacances(j, mois, annee)) {
                         couvert = Math.round(couvert * (1 - veillevacances / 100) / 5) * 5;
                     }
 
-                    // Jours de pont
-                    if (typeJour === "PONT") {
-                        let pontPct = urData[7];
+                    // Pont
+                    if (type === "PONT") {
+                        let pontPct = ur[7];
                         couvert = Math.round(couvert * (pontPct / 100) / 5) * 5;
                     }
                 }
             }
 
-
-            if (nomJour === "SA" || nomJour === "DI" || typeJour === "JFER") {
-                couvert = 0;
-            }
+            if (["SA","DI"].includes(nom) || type === "JFER") couvert = 0;
 
             const input = $(`#NBCOUV_${i}`);
             if (input.length) input.val(couvert).trigger('change');
@@ -185,33 +173,31 @@
     }
 
     function ajouterBoutonApresExporterTotal() {
-        const divRef = document.getElementById('id_btn_name_BT_exporterTotal');
-        if (!divRef || document.getElementById('id_btn_name_btnOk')) return;
+        const ref = document.getElementById('id_btn_name_BT_exporterTotal');
+        if (!ref || document.getElementById('id_btn_name_btnOk')) return;
 
-        const tdParent = divRef.parentElement;
+        const tdParent = ref.parentElement;
         const td = document.createElement('td');
-        td.setAttribute('align', 'left');
-        td.setAttribute('height', '30');
         td.innerHTML = '&nbsp;';
 
         const div = document.createElement('div');
         div.id = 'id_btn_name_btnOk';
         div.className = 'cougar-btn cougar-btn-workflow';
         div.style.width = '112px';
-        div.innerHTML = '<em><span style="height:16px;">&#x1F374;&nbsp;Ajouter Couverts</span></em>';
+        div.innerHTML = '<em><span>&#x1F374;&nbsp;Ajouter Couverts</span></em>';
 
-        div.onclick = function() { appliquerCouverts(); return false; };
-        div.onmousedown = function() { this.className='cougar-btn cougar-btn-over cougar-btn-pressed cougar-btn-workflow'; };
-        div.onmouseout  = function() { this.className='cougar-btn cougar-btn-workflow'; };
-        div.onmouseover = function() { this.className='cougar-btn cougar-btn-over cougar-btn-workflow'; };
+        div.onclick = () => appliquerCouverts();
+        div.onmouseover = () => div.className = 'cougar-btn cougar-btn-over cougar-btn-workflow';
+        div.onmouseout  = () => div.className = 'cougar-btn cougar-btn-workflow';
+        div.onmousedown = () => div.className = 'cougar-btn cougar-btn-over cougar-btn-pressed cougar-btn-workflow';
 
         td.appendChild(div);
         tdParent.parentNode.insertBefore(td, tdParent.nextSibling);
     }
 
     const observer = new MutationObserver(() => {
-        const bandeauEnteteProd = document.querySelector('.BandeauEntete');
-        if (bandeauEnteteProd && bandeauEnteteProd.textContent.trim() === "Saisie productivité prévisionnelle") {
+        const b = document.querySelector('.BandeauEntete');
+        if (b && b.textContent.trim() === "Saisie productivité prévisionnelle") {
             ajouterBoutonApresExporterTotal();
         }
     });
