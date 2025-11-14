@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Optimisation d'affichage
-// @version      0.5
+// @version      0.51
 // @description  Optimisation de l'affichage (version corrigée DOM dynamique)
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -35,7 +35,7 @@
   function getSixNextMonths() {
     const months = [];
     const currentDate = new Date();
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 10; i++) {
       const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + i + 1, 1);
       const formattedDate = ('0' + (nextMonth.getMonth() + 1)).slice(-2) + '.' + nextMonth.getFullYear();
       months.push(formattedDate);
