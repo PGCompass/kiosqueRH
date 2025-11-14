@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH – Couverts automatique
-// @version      2.0
+// @version      2.1
 // @description  Ajout des couverts en automatique
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -46,7 +46,7 @@
     ];
 
     const finaout = [
-        ["finaout 2026", "2026-08-24", "2026-09-04", 20]
+        ["finaout 2026", "2026-08-22", "2026-09-04", 20]
     ];
 
     const veillevacances = 15;
