@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name         KiosqueRH - Couverts automatique
-// @version      1.0
+// @name         KiosqueRH – Couverts automatique
+// @version      1.2
 // @description  Ajout des couverts en automatique
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -13,8 +13,8 @@
 
 (function() {
     'use strict';
+
     const CouvertsUR = [
-        //codeUR, LU, MA, ME, JE, VE, pourcentage de baisse des vacances, pourcentage a appliquer sur les couverts des jours de PONT
         ["234001",  60,  60,  40,  20,  20, 10,  0],
         ["304501", 320, 380, 320, 300, 110, 10,  0],
         ["960001", 680, 660, 650, 630, 400, 10, 15],
@@ -37,134 +37,178 @@
         ["Vacances d’été 2026", "2026-07-04", "2026-09-01"]
     ];
 
-    // Récupération du code UR
-    const codeUR = $('#CODE_UR').val();
+    // Ramadan
+    const ramadan = [
+        ["Ramadan 2026", "2026-02-17", "2026-03-19", 10]
+    ];
 
-    // Récupération du mois et de l'année
+    // Période d'aout
+    const aout = [
+        ["aout 2026", "2026-07-27", "2026-08-21"]
+    ];
+
+
+    // Vendredi veille vacances : -15%
+    const veillevacances = 15;
+
+    const codeUR = $('#CODE_UR').val();
     let titreSynth = $('.ProdTitreLigneSynth').text().trim();
     let [_, mois, annee] = titreSynth.match(/(\d{1,2})\.(\d{4})/) || [];
     mois = parseInt(mois);
     annee = parseInt(annee);
 
-    // Fonctions de récupération du jour et type
     function getNomJourById(id) {
         const cells = document.querySelectorAll('#ligne table.ProdTable tr:first-of-type td.ProdDonneesCal');
-        if (id < 0 || id >= cells.length) return "";
+        if (!cells[id]) return "";
         return cells[id].innerText.replace(/\u00A0/g, '').split('\n')[0].trim();
     }
 
     function getJourById(id) {
         const cells = document.querySelectorAll('#ligne table.ProdTable tr:first-of-type td.ProdDonneesCal');
-        if (id < 0 || id >= cells.length) return "";
+        if (!cells[id]) return "";
         return cells[id].innerText.replace(/\u00A0/g, '').split('\n')[1].replace(/^0/, '').trim();
     }
 
     function getTypeJourById(id) {
         const cells = Array.from(document.querySelectorAll('#ligne table.ProdTable tr:nth-of-type(2) td.ProdDonneesCal')).slice(1);
-        if (id < 0 || id >= cells.length) return "";
+        if (!cells[id]) return "";
         return cells[id].innerText.replace(/\u00A0/g, '').trim();
     }
 
-    // Vérification si une date est dans les vacances
     function estVacances(jour, mois, annee) {
         const date = new Date(annee, mois - 1, jour);
         for (let vac of vacances) {
-            const debut = new Date(vac[1]);
-            const fin = new Date(vac[2]);
+            if (date >= new Date(vac[1]) && date <= new Date(vac[2])) return true;
+        }
+        return false;
+    }
+
+    function estRamadan(jour, mois, annee) {
+        const date = new Date(annee, mois - 1, jour);
+        for (let r of ramadan) {
+            const debut = new Date(r[1]);
+            const fin = new Date(r[2]);
+            if (date >= debut && date <= fin) return r[3];
+        }
+        return 0;
+    }
+
+    function estPeriodeAout(jour, mois, annee) {
+        const date = new Date(annee, mois - 1, jour);
+        for (let p of aout) {
+            const debut = new Date(p[1]);
+            const fin = new Date(p[2]);
             if (date >= debut && date <= fin) return true;
         }
         return false;
     }
 
-    // Application des couverts
+    function estVeilleVacances(jour, mois, annee) {
+        const date = new Date(annee, mois - 1, jour);
+        const lendemain = new Date(date);
+        lendemain.setDate(date.getDate() + 1);
+
+        for (let vac of vacances) {
+            if (lendemain.toDateString() === new Date(vac[1]).toDateString()) return true;
+        }
+        return false;
+    }
+
     function appliquerCouverts() {
         const urData = CouvertsUR.find(u => u[0] === codeUR);
         if (!urData) return;
 
-        const lignes = $('#ligne table.ProdTable tr:first-of-type td.ProdDonneesCal');
+        const colonnes = $('#ligne table.ProdTable tr:first-of-type td.ProdDonneesCal');
 
-        lignes.each(function(i, td) {
+        colonnes.each(function(i) {
             let nomJour = getNomJourById(i);
             const jourNum = parseInt(getJourById(i));
             const typeJour = getTypeJourById(i);
+
             let idxJour = ["LU", "MA", "ME", "JE", "VE"].indexOf(nomJour);
             let couvert = 0;
 
-            // Vérifier si le lendemain est un JFER et si aujourd'hui n'est pas VE, SA ou DI
             const nextTypeJour = getTypeJourById(i + 1);
             if (nextTypeJour === "JFER" && nomJour !== "VE" && nomJour !== "SA" && nomJour !== "DI") {
-                idxJour = 4; // appliquer les couverts du vendredi
+                idxJour = 4;
             }
 
             if (idxJour !== -1 && typeJour !== "JFER") {
                 couvert = urData[idxJour + 1];
 
-                // appliquer la réduction vacances
-                if (estVacances(jourNum, mois, annee)) {
-                    let reduction = urData[6];
-                    couvert = Math.round(couvert * (1 - reduction / 100) / 5) * 5;
+                // ===== AOUT (prioritaire) =====
+                if (estPeriodeAout(jourNum, mois, annee)) {
+                    let pctAout = urData[8]; // nouvelle colonne
+                    couvert = Math.round(couvert * (1 - pctAout / 100) / 5) * 5;
+                    // On saute toutes les autres baisses
                 }
 
-                // appliquer le pourcentage PONT si le jour est un pont
-                if (typeJour === "PONT") {
-                    let pontPct = urData[7];
-                    couvert = Math.round(couvert * (pontPct / 100) / 5) * 5;
+                // ===== sinon règles normales =====
+                else {
+
+                    // Vacances
+                    if (estVacances(jourNum, mois, annee)) {
+                        let reduction = urData[6];
+                        couvert = Math.round(couvert * (1 - reduction / 100) / 5) * 5;
+                    }
+
+                    // Ramadan
+                    let ramadanPct = estRamadan(jourNum, mois, annee);
+                    if (ramadanPct > 0) {
+                        if (estVacances(jourNum, mois, annee)) {
+                            ramadanPct = ramadanPct / 2;
+                        }
+                        couvert = Math.round(couvert * (1 - ramadanPct / 100) / 5) * 5;
+                    }
+
+                    // Vendredi veille vacances
+                    if (nomJour === "VE" && estVeilleVacances(jourNum, mois, annee)) {
+                        couvert = Math.round(couvert * (1 - veillevacances / 100) / 5) * 5;
+                    }
+
+                    // Jours de pont
+                    if (typeJour === "PONT") {
+                        let pontPct = urData[7];
+                        couvert = Math.round(couvert * (pontPct / 100) / 5) * 5;
+                    }
                 }
             }
 
-            // SA, DI, JFER restent à 0
+
             if (nomJour === "SA" || nomJour === "DI" || typeJour === "JFER") {
                 couvert = 0;
             }
 
-            // Mise à jour du champ
-            let input = $(`#NBCOUV_${i}`);
+            const input = $(`#NBCOUV_${i}`);
             if (input.length) input.val(couvert).trigger('change');
         });
     }
 
-
-
     function ajouterBoutonApresExporterTotal() {
         const divRef = document.getElementById('id_btn_name_BT_exporterTotal');
-        if (!divRef || document.getElementById('id_btn_name_btnOk')) return; // éviter doublons
+        if (!divRef || document.getElementById('id_btn_name_btnOk')) return;
 
-        const tdParent = divRef.parentElement; // le <td> existant
+        const tdParent = divRef.parentElement;
         const td = document.createElement('td');
         td.setAttribute('align', 'left');
         td.setAttribute('height', '30');
-
-        // ajouter espace comme les autres
         td.innerHTML = '&nbsp;';
 
         const div = document.createElement('div');
-        div.name = 'btnOk';
         div.id = 'id_btn_name_btnOk';
         div.className = 'cougar-btn cougar-btn-workflow';
-        div.style.width = '112px'; // un peu plus large pour l'icône
+        div.style.width = '112px';
         div.innerHTML = '<em><span style="height:16px;">&#x1F374;&nbsp;Ajouter Couverts</span></em>';
 
-        div.onclick = function() {
-            if (this.disabled) return false;
-            // lancement de la fonction pour les couverts automatiques
-            appliquerCouverts();
-            return false;
-        };
-        div.onmousedown = function() { if(!this.disabled) this.className='cougar-btn cougar-btn-over cougar-btn-pressed cougar-btn-workflow'; };
-        div.onmouseout = function() { if(!this.disabled) this.className='cougar-btn cougar-btn-workflow'; };
-        div.onmouseover = function() { if(!this.disabled) this.className='cougar-btn cougar-btn-over cougar-btn-workflow'; };
+        div.onclick = function() { appliquerCouverts(); return false; };
+        div.onmousedown = function() { this.className='cougar-btn cougar-btn-over cougar-btn-pressed cougar-btn-workflow'; };
+        div.onmouseout  = function() { this.className='cougar-btn cougar-btn-workflow'; };
+        div.onmouseover = function() { this.className='cougar-btn cougar-btn-over cougar-btn-workflow'; };
 
         td.appendChild(div);
-
-        // Insérer le nouveau <td> juste après le td existant
-        if (tdParent.nextSibling) {
-            tdParent.parentNode.insertBefore(td, tdParent.nextSibling);
-        } else {
-            tdParent.parentNode.appendChild(td);
-        }
+        tdParent.parentNode.insertBefore(td, tdParent.nextSibling);
     }
 
-    // Observer le DOM pour attendre que BT_exporterTotal soit ajouté
     const observer = new MutationObserver(() => {
         const bandeauEnteteProd = document.querySelector('.BandeauEntete');
         if (bandeauEnteteProd && bandeauEnteteProd.textContent.trim() === "Saisie productivité prévisionnelle") {
@@ -173,4 +217,5 @@
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
+
 })();
