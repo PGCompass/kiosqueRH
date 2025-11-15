@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Vérification productivité auto
-// @version      2.54
+// @version      2.55
 // @description  Calcul automatique des productivités
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -35,20 +35,21 @@
 
     /*************** Fonction utilitaire pour savoir si on doit recalculer ***************/
     function doitRecalculer(NBCOUV, col_id) {
-        // Si mois/année avant la date actuelle => ne pas recalculer
-        if (KiosqueRHYear < currentYear || (KiosqueRHYear === currentYear && KiosqueRHMonth < currentMonth)) {
-            return false;
-        }
-        // Si année/mois strictement après => recalcul toujours
-        if (KiosqueRHYear > currentYear || KiosqueRHMonth > currentMonth) {
-            return NBCOUV > 0;
-        }
-        // Même mois et année => uniquement si col_id > jour actuel
-        if (col_id > date_jour) {
-            return NBCOUV > 0;
-        }
-        return false;
+        const isPast =
+            KiosqueRHYear < currentYear ||
+            (KiosqueRHYear === currentYear && KiosqueRHMonth < currentMonth);
+    
+        const isFuture =
+            KiosqueRHYear > currentYear ||
+            (KiosqueRHYear === currentYear && KiosqueRHMonth > currentMonth);
+    
+        if (isPast) return false;
+        if (isFuture) return NBCOUV > 0;
+    
+        // même mois & même année
+        return col_id > date_jour && NBCOUV > 0;
     }
+
 
 
     /*************** Fonction utilitaire pour créer un bouton après BT_exporterTotal ***************/
