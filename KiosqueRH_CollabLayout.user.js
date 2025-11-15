@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Mise en page collaborateurs
-// @version      3.49
+// @version      3.5
 // @description  Reorder <tr> elements in the ProdTable within the 'colonne' div based on a predefined list of priorities
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -85,23 +85,31 @@
       });
     }
 
-    function writeDataToRows(data) {
-      const colonneDiv = document.getElementById('colonne');
-      const rows = Array.from(colonneDiv.querySelectorAll('td.ProdTitreLigne'));
-      let targetRowIndex = rows.findIndex(r => r.textContent.trim() === "Total Salariés");
+    const writeDataInRow = (row, data) => {
+        if (!row) return;
+        const cells = row.querySelectorAll('td.ProdNBH');
+        const cells_tot = row.querySelectorAll('td.ProdNBHTot');
+        if (cells_tot[0]) cells_tot[0].textContent = "";
+    
+        let index = 0;
+        for (const key in data) {
+            if (index >= cells.length) break;
+            const couverts = getNumericInputValue(0, index + 1);
+            const cell = cells[index];
+            // Si aucune donnée, afficher vide
+            cell.textContent = (data[key] === undefined || data[key] === 0) ? "" : data[key];
+            cell.style.textAlign = "center";
+            cell.style.fontWeight = "bold";
+            if (couverts == 0 && data[key] > 0) cell.style.backgroundColor = '#FF0000';
+            index++;
+        }
+    
+        // Si aucune cellule n'a de valeur, on force le champ vide
+        if (cells.length && Array.from(cells).every(c => c.textContent.trim() === "")) {
+            cells.forEach(c => c.textContent = "");
+        }
+    };
 
-      if (rows.length >= 3) {
-        const rename = (el, txt) => {
-          if (!el) return;
-          el.textContent = txt;
-          el.style.textAlign = 'right';
-          el.style.fontWeight = 'bold';
-        };
-          rename(rows[targetRowIndex], "Nombre de cuisinier");
-          rename(rows[rows.length - 2], "Nombre d'EDR");
-          rename(rows[rows.length - 1], "Nombre de plongeur");
-
-      }
 
       const lastDiv = colonneDiv.nextElementSibling;
       if (!lastDiv) return;
