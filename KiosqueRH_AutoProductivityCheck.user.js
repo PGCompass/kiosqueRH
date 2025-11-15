@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Vérification productivité auto
-// @version      2.56
+// @version      2.60
 // @description  Calcul automatique des productivités
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -158,30 +158,31 @@
             const ajustheureint = document.getElementById('AJUSTINT_' + id);
             const valeurTotpla = document.getElementById('TOTPLA_' + id)?.textContent.trim();
             const totalheure = parseFloat(valeurTotpla?.replace(',', '.') || 0);
-
-            if (jour === "SA" || jour === "DI" || NBCOUV == 0) {
-                ajustheure.value = -totalheure;
-                ajustheureint.value = "0";
-            } else if (NBCOUV < 80 && geturdataProd(codeUR, 1) > 0) {
-                ajustheure.value = -totalheure + geturdataProd(codeUR, 2);
-                ajustheureint.value = 0;
-            } else {
-                const tranche = (NBCOUV - (NBCOUV % (100/3))) / (100/3) + 4;
-                prod = geturdataProd(codeUR, tranche);
-                const heureprev = (NBCOUV / prod) * 7.38;
-                const reste = (totalheure - heureprev) % 7.38;
-                const heuretp = totalheure - heureprev - reste;
-                let nbdemi = 0;
-
-                if (reste / 3.7 > 1 && geturdataProd(codeUR, 3) > 0) nbdemi = 5;
-
-                ajustheure.value = (-heuretp - nbdemi).toFixed(2);
-                ajustheureint.value = 0;
+            if (doitRecalculer(NBCOUV, col_id)) {
+                if (jour === "SA" || jour === "DI" || NBCOUV == 0) {
+                    ajustheure.value = -totalheure;
+                    ajustheureint.value = "0";
+                } else if (NBCOUV < 80 && geturdataProd(codeUR, 1) > 0) {
+                    ajustheure.value = -totalheure + geturdataProd(codeUR, 2);
+                    ajustheureint.value = 0;
+                } else {
+                    const tranche = (NBCOUV - (NBCOUV % (100/3))) / (100/3) + 4;
+                    prod = geturdataProd(codeUR, tranche);
+                    const heureprev = (NBCOUV / prod) * 7.38;
+                    const reste = (totalheure - heureprev) % 7.38;
+                    const heuretp = totalheure - heureprev - reste;
+                    let nbdemi = 0;
+    
+                    if (reste / 3.7 > 1 && geturdataProd(codeUR, 3) > 0) nbdemi = 5;
+    
+                    ajustheure.value = (-heuretp - nbdemi).toFixed(2);
+                    ajustheureint.value = 0;
+                }
+    
+                let col_id = index + 1;
+                if (doitRecalculer(NBCOUV, col_id)) recalculProd(col_id, prod);
+                id += 1;
             }
-
-            let col_id = index + 1;
-            if (doitRecalculer(NBCOUV, col_id)) recalculProd(col_id, prod);
-            id += 1;
         });
     }
 
