@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         KiosqueRH - Vérification productivité auto
-// @version      2.42
+// @version      2.51
 // @description  Calcul automatique des productivités
-// @author       Pierre
+// @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
 // @require      http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
 // @updateURL    https://github.com/PGCompass/kiosqueRH/raw/refs/heads/main/KiosqueRH_AutoProductivityCheck.user.js
@@ -17,67 +17,66 @@
     const bandeauEnteteProd = document.querySelector('.BandeauEntete');
     if (!bandeauEnteteProd) return;
 
+    const pageTitre = bandeauEnteteProd.textContent.trim();
     const periode = $('#PERIODE').val().split('.');
-    const KiosqueRHMonth = parseInt(periode[0], 10);
-    const KiosqueRHYear = parseInt(periode[1], 10);
-
+    const KiosqueRHMonth = parseInt(periode[0], 10); // mois sélectionné
+    const KiosqueRHYear = parseInt(periode[1], 10);  // année sélectionnée
+    
     const today = new Date();
-    const currentMonth = today.getMonth() + 1;
+    const currentMonth = today.getMonth() + 1; // mois actuel 1-12
     const currentYear = today.getFullYear();
-    const date_jour = today.getDate();
+    const date_jour = today.getDate(); // numéro du jour actuel
 
-    /******************** LOGIQUE ANTI-MOIS ANTÉRIEURS ********************/
-    function doitRecalculer(NBCOUV, dayNumber) {
-        NBCOUV = parseInt(NBCOUV, 10) || 0;
-
-        // ⛔ Mois ou années passés → jamais recalculer
-        if (KiosqueRHYear < currentYear ||
-           (KiosqueRHYear === currentYear && KiosqueRHMonth < currentMonth)) {
+    /*************** Fonction utilitaire pour savoir si on doit recalculer ***************/
+    function doitRecalculer(NBCOUV, col_id) {
+        // Si mois/année avant la date actuelle => ne pas recalculer
+        if (KiosqueRHYear < currentYear || (KiosqueRHYear === currentYear && KiosqueRHMonth < currentMonth)) {
             return false;
         }
-
-        // ✅ Mois / années futurs → recalcul complet si NBCOUV > 0
+        // Si année/mois strictement après => recalcul toujours
         if (KiosqueRHYear > currentYear || KiosqueRHMonth > currentMonth) {
             return NBCOUV > 0;
         }
-
-        // 📌 Même mois + même année → jours STRICTEMENT > aujourd'hui
-        return NBCOUV > 0 && dayNumber > date_jour;
+        // Même mois et année => uniquement si col_id > jour actuel
+        return NBCOUV > 0 && col_id > date_jour;
     }
 
-    /******************** BOUTONS ********************/
+
+    /*************** Fonction utilitaire pour créer un bouton après BT_exporterTotal ***************/
     function ajouterBoutonApresExporterTotal(id, label, callback) {
         const ref = document.getElementsByName('BT_exporterTotal')[0];
         if (!ref || document.getElementById(id)) return;
-
+    
         const tdParent = ref.parentElement;
         const td = document.createElement('td');
         td.innerHTML = '&nbsp;';
-
+    
         const div = document.createElement('div');
         div.id = id;
         div.className = 'cougar-btn cougar-btn-workflow';
         div.style.width = '110px';
-
+    
+        // Choix de l'icône selon le bouton
         let icone = '';
-        if(id === 'btnProdAuto') icone = '🧮';
-        if(id === 'btnVerifProd') icone = '🔍';
-
+        if(id === 'btnProdAuto') icone = '🧮';         // calculette
+        if(id === 'btnVerifProd') icone = '🔍';        // loupe
+    
         div.innerHTML = `<em><span>${icone}&nbsp;${label}</span></em>`;
-
+    
         div.onclick = callback;
         div.onmouseover = () => div.className = 'cougar-btn cougar-btn-over cougar-btn-workflow';
         div.onmouseout  = () => div.className = 'cougar-btn cougar-btn-workflow';
         div.onmousedown = () => div.className = 'cougar-btn cougar-btn-over cougar-btn-pressed cougar-btn-workflow';
-
+    
         td.appendChild(div);
         tdParent.parentNode.insertBefore(td, tdParent.nextSibling);
     }
 
+    /*************** Ajout des boutons ***************/
     ajouterBoutonApresExporterTotal('btnProdAuto', 'Prod Auto', recupererContenuPremiereLigneProd);
     ajouterBoutonApresExporterTotal('btnVerifProd', 'Vérif Productivité', verification_prod);
 
-    /******************** TABLE PROD & CALCULS ********************/
+    /*************** Fonctions de calcul de productivité existantes ***************/
     const prodCodeUR = [
         ["234001",0,7.55,0,33,66,99],
         ["304501",1,22.14,0,18,18.3,25,29.6,33.7,33.6,34.7,36.8,39.6,43.7,47.5,48.3,53.9],
@@ -93,83 +92,107 @@
         ["G76301",1,22.14,1,25,25,25,25,33.5,38.3,41.8,46.9,41.4,40.8,46.2,45.6,48,48,48,48,48,48,48,48]
     ];
 
-    function geturdataProd(UR, col) {
-        const row = prodCodeUR.find(r => r[0] === UR);
-        if (!row) return 40;
-        return row[col] ?? row[row.length - 1];
+    function geturdataProd(UR, colonne) {
+        const indiceUR = prodCodeUR.findIndex(item => item[0] === UR);
+        if (indiceUR !== -1) {
+            const urData = prodCodeUR[indiceUR];
+            return (colonne >= 0 && colonne < urData.length) ? urData[colonne] : urData[urData.length - 1];
+        } else {
+            return 40;
+        }
     }
 
     function recalculProd(index, prod) {
-        const tables = document.querySelectorAll('.ProdTable');
-        if (tables.length === 0) return;
-        const table = tables[tables.length - 1];
+        const tablesProd = document.querySelectorAll('.ProdTable');
+        if (tablesProd.length === 0) return;
+        const lastTableProd = tablesProd[tablesProd.length - 1];
 
-        const getInput = (r, c) =>
-            parseFloat(table.querySelectorAll('tr')[r].querySelectorAll('td')[c].querySelector('input')?.value.replace(',', '.') || 0);
+        const getNumericInputValue = (row, column) => parseFloat(
+            lastTableProd.querySelectorAll('tr')[row].querySelectorAll('td')[column].querySelector('input')?.value.trim().replace(',', '.') || 0
+        );
 
-        const couverts = getInput(0, index);
-        const total_salaries = parseFloat(table.querySelectorAll('tr')[1].querySelectorAll('td')[index].textContent.replace(',', '.') || 0);
+        const couverts = getNumericInputValue(0, index);
+        const total_salaries = parseFloat(lastTableProd.querySelectorAll('tr')[1].querySelectorAll('td')[index].textContent.trim().replace(',', '.') || 0);
+        const heure_plus = getNumericInputValue(2, index);
+        const interim = parseFloat(lastTableProd.querySelectorAll('tr')[3].querySelectorAll('td')[index].textContent.trim().replace(',', '.') || 0);
+        const int_heure_plus = getNumericInputValue(4, index);
 
-        const heure_plus = getInput(2, index);
-        const interim = parseFloat(table.querySelectorAll('tr')[3].querySelectorAll('td')[index].textContent.replace(',', '.') || 0);
-        const int_heure_plus = getInput(4, index);
+        const total_heure = lastTableProd.querySelectorAll('tr')[5].querySelectorAll('td')[index];
+        const ETP = lastTableProd.querySelectorAll('tr')[6].querySelectorAll('td')[index];
+        const prod_heure = lastTableProd.querySelectorAll('tr')[7].querySelectorAll('td')[index];
+        const productivite = lastTableProd.querySelectorAll('tr')[8].querySelectorAll('td')[index];
 
-        const total_heure = total_salaries + heure_plus + interim + int_heure_plus;
-        const calc_ETP = total_heure / 7.38;
-        const calc_prod_heure = couverts / total_heure;
+        const calc_total_heure = total_salaries + heure_plus + interim + int_heure_plus;
+        const calc_ETP = calc_total_heure / 7.38;
+        const calc_prod_heure = couverts / calc_total_heure;
         const calc_productivite = couverts / calc_ETP;
 
-        table.querySelectorAll('tr')[5].querySelectorAll('td')[index].textContent = total_heure.toFixed(2).replace('.', ',');
-        table.querySelectorAll('tr')[6].querySelectorAll('td')[index].textContent = calc_ETP.toFixed(2).replace('.', ',');
-        table.querySelectorAll('tr')[7].querySelectorAll('td')[index].textContent = isNaN(calc_prod_heure) ? "0,00" : calc_prod_heure.toFixed(2).replace('.', ',');
-
-        const tdProd = table.querySelectorAll('tr')[8].querySelectorAll('td')[index];
-        tdProd.textContent = isNaN(calc_productivite) ? "0,00" : calc_productivite.toFixed(2).replace('.', ',');
-        tdProd.style.backgroundColor = calc_productivite < (prod * 0.95) ? "red" : "green";
+        total_heure.textContent = calc_total_heure.toFixed(2).replace('.', ',');
+        ETP.textContent = calc_ETP.toFixed(2).replace('.', ',');
+        prod_heure.textContent = !isNaN(calc_prod_heure) ? calc_prod_heure.toFixed(2).replace('.', ',') : '0,00';
+        productivite.textContent = !isNaN(calc_productivite) ? calc_productivite.toFixed(2).replace('.', ',') : '0,00';
+        productivite.style.backgroundColor = calc_productivite < (prod * 0.95) ? "red" : "green";
     }
 
-    /******************** PROD AUTO ********************/
     function recupererContenuPremiereLigneProd() {
         const codeUR = $('#UR').val();
         const td = $('.ProdDonneesCal');
+        const nombreDeTD = td.length;
         let id = 0;
 
-        td.each(function(index, colonne) {
+        if (td.length === 0) return;
+
+        td.slice(0, nombreDeTD).each(function(index, colonne) {
+            let prod = 40;
+            const jour = $(colonne).html().split('<br>')[0];
             const NBCOUV = $('#NBCOUV_' + id).val();
+            const ajustheure = document.getElementById('AJUSTDIV_' + id);
+            const ajustheureint = document.getElementById('AJUSTINT_' + id);
+            const valeurTotpla = document.getElementById('TOTPLA_' + id)?.textContent.trim();
+            const totalheure = parseFloat(valeurTotpla?.replace(',', '.') || 0);
 
-            // récupérer le numéro réel du jour
-            const dayPart = $(colonne).html().split('<br>')[1] || '';
-            const dayNumber = parseInt(dayPart.replace(/\D/g, ''), 10);
+            if (jour === "SA" || jour === "DI" || NBCOUV == 0) {
+                ajustheure.value = -totalheure;
+                ajustheureint.value = "0";
+            } else if (NBCOUV < 80 && geturdataProd(codeUR, 1) > 0) {
+                ajustheure.value = -totalheure + geturdataProd(codeUR, 2);
+                ajustheureint.value = 0;
+            } else {
+                const tranche = (NBCOUV - (NBCOUV % (100/3))) / (100/3) + 4;
+                prod = geturdataProd(codeUR, tranche);
+                const heureprev = (NBCOUV / prod) * 7.38;
+                const reste = (totalheure - heureprev) % 7.38;
+                const heuretp = totalheure - heureprev - reste;
+                let nbdemi = 0;
 
-            let tranche = (NBCOUV - (NBCOUV % (100/3))) / (100/3) + 4;
-            let prod = geturdataProd(codeUR, tranche);
+                if (reste / 3.7 > 1 && geturdataProd(codeUR, 3) > 0) nbdemi = 5;
 
-            if (doitRecalculer(NBCOUV, dayNumber))
-                recalculProd(index + 1, prod);
+                ajustheure.value = (-heuretp - nbdemi).toFixed(2);
+                ajustheureint.value = 0;
+            }
 
-            id++;
+            let col_id = index + 1;
+            if (doitRecalculer(NBCOUV, col_id)) recalculProd(col_id, prod);
+            id += 1;
         });
     }
 
-    /******************** VÉRIFICATION PROD ********************/
     function verification_prod() {
         const codeUR = $('#UR').val();
         const td = $('.ProdDonneesCal');
+        const nombreDeTD = td.length;
         let id = 0;
+        let prod;
 
-        td.each(function(index, colonne) {
+        if (td.length === 0) return;
+
+        td.slice(0, nombreDeTD).each(function(index, colonne) {
             const NBCOUV = $('#NBCOUV_' + id).val();
-
-            const dayPart = $(colonne).html().split('<br>')[1] || '';
-            const dayNumber = parseInt(dayPart.replace(/\D/g, ''), 10);
-
-            let tranche = (NBCOUV - (NBCOUV % (100/3))) / (100/3) + 4;
-            let prod = geturdataProd(codeUR, tranche);
-
-            if (doitRecalculer(NBCOUV, dayNumber))
-                recalculProd(index + 1, prod);
-
-            id++;
+            const tranche = (NBCOUV - (NBCOUV % (100/3))) / (100/3) + 4;
+            prod = geturdataProd(codeUR, tranche);
+            let col_id = index + 1;
+            if (doitRecalculer(NBCOUV, col_id)) recalculProd(col_id, prod);
+            id += 1;
         });
     }
 
