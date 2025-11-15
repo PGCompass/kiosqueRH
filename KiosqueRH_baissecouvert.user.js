@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Baisse Couverts en %
-// @version      1.2
+// @version      1.3
 // @description  Ajoute un bouton Baisse % qui applique une réduction sur un jour du calendrier
 // @match        https://hr-services.fr.adp.com/*
 // @require      http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
@@ -191,7 +191,7 @@
     // --- Observer pour insérer le bouton ---
     const observer = new MutationObserver(() => {
         const b = document.querySelector('.BandeauEntete');
-        if (b && b.textContent.trim() === "Saisie productivité prévisionnelle") {
+        if (b) {
             ajouterBoutonBaisse();
         }
     });
