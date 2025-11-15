@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Vérification productivité auto
-// @version      2.62
+// @version      2.63
 // @description  Calcul automatique des productivités
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -152,14 +152,13 @@
 
         td.slice(0, nombreDeTD).each(function(index, colonne) {
             let prod = 40;
-            let col_id = index + 1;
             const jour = $(colonne).html().split('<br>')[0];
             const NBCOUV = $('#NBCOUV_' + id).val();
             const ajustheure = document.getElementById('AJUSTDIV_' + id);
             const ajustheureint = document.getElementById('AJUSTINT_' + id);
             const valeurTotpla = document.getElementById('TOTPLA_' + id)?.textContent.trim();
             const totalheure = parseFloat(valeurTotpla?.replace(',', '.') || 0);
-            if (doitRecalculer(NBCOUV, col_id)) {
+            if (doitRecalculer(NBCOUV, id + 1)) {
                 if (jour === "SA" || jour === "DI" || NBCOUV == 0) {
                     ajustheure.value = -totalheure;
                     ajustheureint.value = "0";
@@ -180,9 +179,10 @@
                     ajustheureint.value = 0;
                 }
     
-                if (doitRecalculer(NBCOUV, col_id)) recalculProd(col_id, prod);
-                id += 1;
+                let col_id = index + 1;
+                recalculProd(col_id, prod);
             }
+            id += 1;
         });
     }
 
