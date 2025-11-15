@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Vérification productivité auto
-// @version      2.61
+// @version      2.62
 // @description  Calcul automatique des productivités
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -145,53 +145,46 @@
     function recupererContenuPremiereLigneProd() {
         const codeUR = $('#UR').val();
         const td = $('.ProdDonneesCal');
+        const nombreDeTD = td.length;
         let id = 0;
-    
+
         if (td.length === 0) return;
-    
-        td.each(function(index, colonne) {
+
+        td.slice(0, nombreDeTD).each(function(index, colonne) {
             let prod = 40;
-            const col_id = index + 1;
-    
+            let col_id = index + 1;
             const jour = $(colonne).html().split('<br>')[0];
             const NBCOUV = $('#NBCOUV_' + id).val();
             const ajustheure = document.getElementById('AJUSTDIV_' + id);
             const ajustheureint = document.getElementById('AJUSTINT_' + id);
             const valeurTotpla = document.getElementById('TOTPLA_' + id)?.textContent.trim();
             const totalheure = parseFloat(valeurTotpla?.replace(',', '.') || 0);
-    
-            // --- Toujours calculer les ajustements ---
-            if (jour === "SA" || jour === "DI" || NBCOUV == 0) {
-                ajustheure.value = -totalheure;
-                ajustheureint.value = "0";
-            } 
-            else if (NBCOUV < 80 && geturdataProd(codeUR, 1) > 0) {
-                ajustheure.value = -totalheure + geturdataProd(codeUR, 2);
-                ajustheureint.value = "0";
-            } 
-            else {
-                const tranche = (NBCOUV - (NBCOUV % (100/3))) / (100/3) + 4;
-                prod = geturdataProd(codeUR, tranche);
-    
-                const heureprev = (NBCOUV / prod) * 7.38;
-                const reste = (totalheure - heureprev) % 7.38;
-                const heuretp = totalheure - heureprev - reste;
-    
-                const nbdemi = (reste / 3.7 > 1 && geturdataProd(codeUR, 3) > 0) ? 5 : 0;
-    
-                ajustheure.value = (-heuretp - nbdemi).toFixed(2);
-                ajustheureint.value = "0";
-            }
-    
-            // --- Recalcul de productivité si nécessaire ---
             if (doitRecalculer(NBCOUV, col_id)) {
-                recalculProd(col_id, prod);
-            }
+                if (jour === "SA" || jour === "DI" || NBCOUV == 0) {
+                    ajustheure.value = -totalheure;
+                    ajustheureint.value = "0";
+                } else if (NBCOUV < 80 && geturdataProd(codeUR, 1) > 0) {
+                    ajustheure.value = -totalheure + geturdataProd(codeUR, 2);
+                    ajustheureint.value = 0;
+                } else {
+                    const tranche = (NBCOUV - (NBCOUV % (100/3))) / (100/3) + 4;
+                    prod = geturdataProd(codeUR, tranche);
+                    const heureprev = (NBCOUV / prod) * 7.38;
+                    const reste = (totalheure - heureprev) % 7.38;
+                    const heuretp = totalheure - heureprev - reste;
+                    let nbdemi = 0;
     
-            id++;
+                    if (reste / 3.7 > 1 && geturdataProd(codeUR, 3) > 0) nbdemi = 5;
+    
+                    ajustheure.value = (-heuretp - nbdemi).toFixed(2);
+                    ajustheureint.value = 0;
+                }
+    
+                if (doitRecalculer(NBCOUV, col_id)) recalculProd(col_id, prod);
+                id += 1;
+            }
         });
     }
-
 
     function verification_prod() {
         const codeUR = $('#UR').val();
