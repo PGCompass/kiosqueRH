@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Vérification productivité auto
-// @version      2.4
+// @version      2.41
 // @description  Calcul automatique des productivités
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -47,7 +47,7 @@
         const div = document.createElement('div');
         div.id = id;
         div.className = 'cougar-btn cougar-btn-workflow';
-        div.style.width = '140px';
+        div.style.width = '110px';
     
         // Choix de l'icône selon le bouton
         let icone = '';
