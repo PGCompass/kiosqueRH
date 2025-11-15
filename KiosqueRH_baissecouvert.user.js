@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Baisse Couverts en %
-// @version      1.5
+// @version      1.51
 // @description  Ajoute un bouton Baisse % qui applique une réduction sur un jour du calendrier
 // @match        https://hr-services.fr.adp.com/*
 // @require      http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
@@ -61,7 +61,7 @@
         div.id = 'id_btn_name_btnBaisse';
         div.className = 'cougar-btn cougar-btn-workflow';
         div.style.width = '100px';
-        div.innerHTML = '<em><span>&#xFF05;&nbsp;Baisse couverts</span></em>';
+        div.innerHTML = '<em><span>📉&nbsp;Baisse couverts</span></em>';
 
         div.onclick = () => openPopupBaisse();
         div.onmouseover = () => div.className = 'cougar-btn cougar-btn-over cougar-btn-workflow';
