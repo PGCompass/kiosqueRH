@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Vérification productivité auto
-// @version      2.52
+// @version      2.53
 // @description  Calcul automatique des productivités
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -27,6 +27,12 @@
     const currentYear = today.getFullYear();
     const date_jour = today.getDate(); // numéro du jour actuel
 
+    console.log("KiosqueRHMonth :", KiosqueRHMonth);
+    console.log("KiosqueRHYear  :", KiosqueRHYear);
+    console.log("currentMonth   :", currentMonth);
+    console.log("currentYear    :", currentYear);
+    console.log("date_jour      :", date_jour);
+
     /*************** Fonction utilitaire pour savoir si on doit recalculer ***************/
     function doitRecalculer(NBCOUV, col_id) {
         // Si mois/année avant la date actuelle => ne pas recalculer
@@ -38,7 +44,9 @@
             return NBCOUV > 0;
         }
         // Même mois et année => uniquement si col_id > jour actuel
-        return NBCOUV > 0 && col_id > date_jour;
+        if (col_id > date_jour) {
+            return NBCOUV > 0;
+        }
     }
 
 
