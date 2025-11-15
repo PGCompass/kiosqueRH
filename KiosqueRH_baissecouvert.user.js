@@ -1,7 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Baisse Couverts en %
-// @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.2
 // @description  Ajoute un bouton Baisse % qui applique une réduction sur un jour du calendrier
 // @match        https://hr-services.fr.adp.com/*
 // @require      http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
