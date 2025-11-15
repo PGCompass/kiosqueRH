@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Vérification productivité auto
-// @version      2.51
+// @version      2.52
 // @description  Calcul automatique des productivités
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -18,9 +18,9 @@
     if (!bandeauEnteteProd) return;
 
     const pageTitre = bandeauEnteteProd.textContent.trim();
-    const periode = $('#PERIODE').val().split('.');
-    const KiosqueRHMonth = parseInt(periode[0], 10); // mois sélectionné
-    const KiosqueRHYear = parseInt(periode[1], 10);  // année sélectionnée
+    const el = document.querySelector('.ProdTitreLigneSynth');
+    const txt = el.textContent;
+    const [KiosqueRHMonth, KiosqueRHYear] = txt.match(/(\d{2})\.(\d{4})/).slice(1);
     
     const today = new Date();
     const currentMonth = today.getMonth() + 1; // mois actuel 1-12
