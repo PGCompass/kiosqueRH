@@ -32,7 +32,7 @@
 
     const bandeauEnteteProd = document.querySelector('.BandeauEntete');
 
-    if (bandeauEnteteProd && bandeauEnteteProd.textContent.trim() === "Saisie productivité prévisionnelle") {
+    if (bandeauEnteteProd) {
         attachButtonEvents();
         customizeButtons();
     }
