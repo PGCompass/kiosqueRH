@@ -47,6 +47,7 @@
         if (col_id > date_jour) {
             return NBCOUV > 0;
         }
+        return false;
     }
 
 
