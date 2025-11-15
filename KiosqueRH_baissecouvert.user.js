@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Baisse Couverts en %
-// @version      1.51
+// @version      1.52
 // @description  Ajoute un bouton Baisse % qui applique une réduction sur un jour du calendrier
 // @match        https://hr-services.fr.adp.com/*
 // @require      http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
@@ -10,6 +10,9 @@
 // ==/UserScript==
 
 /* global $ */
+
+// note de mise a jour : ajout d'icone 
+
 (function() {
     'use strict';
 
