@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Vérification productivité auto
-// @version      2.3
+// @version      2.4
 // @description  Calcul automatique des productivités
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -39,22 +39,28 @@
     function ajouterBoutonApresExporterTotal(id, label, callback) {
         const ref = document.getElementsByName('BT_exporterTotal')[0];
         if (!ref || document.getElementById(id)) return;
-
+    
         const tdParent = ref.parentElement;
         const td = document.createElement('td');
         td.innerHTML = '&nbsp;';
-
+    
         const div = document.createElement('div');
         div.id = id;
         div.className = 'cougar-btn cougar-btn-workflow';
         div.style.width = '140px';
-        div.innerHTML = `<em><span>&#x1F374;&nbsp;${label}</span></em>`; // 🍴 icône fourchette
-
+    
+        // Choix de l'icône selon le bouton
+        let icone = '';
+        if(id === 'btnProdAuto') icone = '🧮';         // calculette
+        if(id === 'btnVerifProd') icone = '🔍';        // loupe
+    
+        div.innerHTML = `<em><span>${icone}&nbsp;${label}</span></em>`;
+    
         div.onclick = callback;
         div.onmouseover = () => div.className = 'cougar-btn cougar-btn-over cougar-btn-workflow';
         div.onmouseout  = () => div.className = 'cougar-btn cougar-btn-workflow';
         div.onmousedown = () => div.className = 'cougar-btn cougar-btn-over cougar-btn-pressed cougar-btn-workflow';
-
+    
         td.appendChild(div);
         tdParent.parentNode.insertBefore(td, tdParent.nextSibling);
     }
