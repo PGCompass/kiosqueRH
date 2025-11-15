@@ -42,10 +42,10 @@
             (KiosqueRHYear === currentYear && KiosqueRHMonth > currentMonth);
     
         if (isPast) return false;
-        if (isFuture) return NBCOUV > 0;
+        if (isFuture) return true;
     
         // même mois & même année
-        return col_id > date_jour && NBCOUV > 0;
+        return col_id > date_jour;
     }
 
 
@@ -180,7 +180,7 @@
                 }
     
                 let col_id = index + 1;
-                recalculProd(col_id, prod);
+                if (NBCOUV > 0) recalculProd(col_id, prod);
             }
             id += 1;
         });
@@ -200,7 +200,7 @@
             const tranche = (NBCOUV - (NBCOUV % (100/3))) / (100/3) + 4;
             prod = geturdataProd(codeUR, tranche);
             let col_id = index + 1;
-            if (doitRecalculer(NBCOUV, col_id)) recalculProd(col_id, prod);
+            if (doitRecalculer(NBCOUV, col_id) && NBCOUV > 0) recalculProd(col_id, prod);
             id += 1;
         });
     }
