@@ -5,8 +5,8 @@
 // @description  Ajoute un bouton Baisse % qui applique une réduction sur un jour du calendrier
 // @match        https://hr-services.fr.adp.com/*
 // @require      http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
-// @updateURL
-// @downloadURL
+// @updateURL    https://github.com/PGCompass/kiosqueRH/raw/refs/heads/main/KiosqueRH_baissecouvert.user.js
+// @downloadURL  https://github.com/PGCompass/kiosqueRH/raw/refs/heads/main/KiosqueRH_baissecouvert.user.js
 // @grant        none
 // ==/UserScript==
 
