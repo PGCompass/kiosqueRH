@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH – Couverts automatique
-// @version      2.2
+// @version      2.3
 // @description  Ajout des couverts en automatique
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -15,6 +15,7 @@
     'use strict';
 
     const CouvertsUR = [
+        //CODE UR,  LU,  MA,  ME,  JE,  VE, baisse vacances, % baisse pont, % baisse fin aout
         ["234001",  60,  60,  40,  20,  20, 10,  0,  0],
         ["304501", 320, 380, 320, 300, 110, 10,  0, 40],
         ["960001", 680, 660, 650, 630, 400, 10, 15, 65],
@@ -37,7 +38,7 @@
         ["Vacances d’été 2026", "2026-07-04", "2026-09-01"]
     ];
     
-    //incluse la veille pour eviter les erreurs : eemple ramadan par du lundi mettre la date du dimanche
+    //inclure la veille pour eviter les erreurs : exemple ramadan par du lundi mettre la date du dimanche
     const ramadan = [
         ["Ramadan 2026", "2026-02-16", "2026-03-19", 10]
     ];
