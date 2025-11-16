@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         KiosqueRH - Navigation mois
-// @version      1.1
+// @version      1.0
 // @description  Ajoute des boutons pour naviguer mois par mois sur le select PERIODE (compatible ADP)
 // @author       Pierre GARDIE
 // @match        https://hr-services.fr.adp.com/*
-// @updateURL    
-// @downloadURL  
+// @updateURL    https://github.com/PGCompass/kiosqueRH/raw/refs/heads/main/KiosqueRH_MonthNavigation.user.js
+// @downloadURL  https://github.com/PGCompass/kiosqueRH/raw/refs/heads/main/KiosqueRH_MonthNavigation.user.js
 // @grant        none
 // ==/UserScript==
 
