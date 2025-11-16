@@ -4,6 +4,8 @@
 // @description  Ajoute des boutons pour naviguer mois par mois sur le select PERIODE (compatible ADP)
 // @author       Pierre GARDIE
 // @match        https://hr-services.fr.adp.com/*
+// @updateURL    
+// @downloadURL  
 // @grant        none
 // ==/UserScript==
 
