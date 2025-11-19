@@ -4,6 +4,8 @@
 // @description  Génère un mail Outlook selon les prévisions et heures négatives
 // @match        https://hr-services.fr.adp.com/*
 // @require      http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
+// @updateURL    
+// @downloadURL  
 // ==/UserScript==
 
 /* global $ */
