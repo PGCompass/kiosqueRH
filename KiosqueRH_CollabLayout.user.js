@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         KiosqueRH - Mise en page collaborateurs
-// @version      3.64
+// @version      3.65
 // @description  Reorder <tr> elements in the ProdTable within the 'colonne' div based on a predefined list of priorities
 // @author       Pierre GARDIE - Compass Group France
 // @match        https://hr-services.fr.adp.com/*
@@ -29,6 +29,8 @@
   // Assigne certains salariés à un groupe précis (index du tableau priorities).
   // ⚠️ Dépendance forte à l'orthographe/majuscules des noms affichés.
   const Role_employees = {
+    // GERANT
+    "RHABBAR CATHERI":0,
     // CUISINIER
     "SIBON FRANCK": 1,
     "APPOLON BEATRIC": 1,
